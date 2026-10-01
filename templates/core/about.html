@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}About Us{% endblock %}
+{% block meta_description %}{% if site.about_text %}{{ site.about_text|truncatechars:155 }}{% else %}Learn about {{ SITE_DISPLAY_NAME }}, Chennai — our story, mission and vision.{% endif %}{% endblock %}
+{% block og_title %}About — {{ SITE_DISPLAY_NAME }}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading="About Us" heading_urdu="ہمارے بارے میں" crumbs="About" %}
+<section class="section">
+  <div class="container about-grid">
+    <div class="about-story prose">
+      <h2>Our story</h2>
+      {% if site.about_text %}{{ site.about_text|linebreaks }}{% else %}<p>Our story will be shared here soon.</p>{% endif %}
+    </div>
+    <aside class="about-logo">
+      <img src="{% static 'img/logo.png' %}" alt="{{ SITE_DISPLAY_NAME }} logo" width="240" height="240" loading="lazy">
+      <p class="about-urdu" lang="ur" dir="rtl">انجمنِ فیضانِ ربانی</p>
+      <p><strong>{{ site.committee_name }}</strong></p>
+    </aside>
+  </div>
+  <div class="container mv-grid">
+    <div class="mv-card">
+      <h2>Our mission <span lang="ur" dir="rtl">ہمارا مشن</span></h2>
+      {% if site.mission %}{{ site.mission|linebreaks }}{% else %}<p>Coming soon.</p>{% endif %}
+    </div>
+    <div class="mv-card">
+      <h2>Our vision <span lang="ur" dir="rtl">ہمارا وژن</span></h2>
+      {% if site.vision %}{{ site.vision|linebreaks }}{% else %}<p>Coming soon.</p>{% endif %}
+    </div>
+  </div>
+  <div class="container about-cta">
+    <a class="btn btn-primary" href="{% url 'contact:contact' %}">Contact the committee</a>
+    {% if site.youtube_url %}<a class="btn btn-youtube" href="{{ site.youtube_url }}" target="_blank" rel="noopener"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-youtube"/></svg> Visit our channel</a>{% endif %}
+  </div>
+</section>
+{% endblock %}

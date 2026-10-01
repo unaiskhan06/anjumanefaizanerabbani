@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% if page_obj.number > 1 %} (Page {{ page_obj.number }}){% endif %}{% endblock %}
+{% block meta_description %}{{ title }} from {{ SITE_DISPLAY_NAME }} — Naat Sharif, Bayan and spiritual videos.{% endblock %}
+{% block og_title %}{{ title }} — {{ SITE_DISPLAY_NAME }}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading=title heading_urdu=title_urdu crumbs=title %}
+<section class="section">
+  <div class="container">
+    <nav class="chips-wrap" aria-label="Filter by type">
+      <ul class="chips">
+        <li><a class="chip{% if not video_type %} is-active{% endif %}" href="{% url 'videos:all' %}">All</a></li>
+        <li><a class="chip{% if video_type == 'full' %} is-active{% endif %}" href="?type=full">Full videos</a></li>
+        <li><a class="chip{% if video_type == 'short' %} is-active{% endif %}" href="?type=short">Shorts</a></li>
+        <li><a class="chip{% if video_type == 'kids' %} is-active{% endif %}" href="?type=kids">Kids</a></li>
+        <li><a class="chip{% if video_type == 'audio' %} is-active{% endif %}" href="?type=audio">Audio naats</a></li>
+      </ul>
+    </nav>
+    {% if page_obj.object_list %}
+      <div class="grid video-grid{% if video_type == 'short' %} video-grid--short{% endif %}">
+        {% for video in page_obj %}{% include "partials/_card.html" %}{% endfor %}
+      </div>
+      {% include "partials/_pager.html" %}
+    {% else %}
+      {% include "partials/_empty.html" with message="No videos here yet — please check back soon." link_url="/" %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

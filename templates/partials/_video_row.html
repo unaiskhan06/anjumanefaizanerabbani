@@ -1,0 +1,27 @@
+<section class="section video-row-section" aria-labelledby="row-{{ row.id }}">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title" id="row-{{ row.id }}">
+        {{ row.title }} <span class="section-urdu" lang="ur" dir="rtl">{{ row.title_urdu }}</span>
+      </h2>
+      <div class="section-actions">
+        {% if row.videos|length > 3 %}
+        <button class="row-arrow" type="button" aria-label="Scroll {{ row.title }} left" data-row-scroll="-1" aria-controls="track-{{ row.id }}">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-left"/></svg>
+        </button>
+        <button class="row-arrow" type="button" aria-label="Scroll {{ row.title }} right" data-row-scroll="1" aria-controls="track-{{ row.id }}">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+        </button>
+        {% endif %}
+        <a class="link-more" href="{{ row.url }}">Show all <span aria-hidden="true">→</span><span class="visually-hidden"> {{ row.title }}</span></a>
+      </div>
+    </div>
+    {% if row.videos %}
+      <div class="video-row{% if row.is_short_row %} video-row--short{% endif %}" id="track-{{ row.id }}" tabindex="0" aria-label="{{ row.title }} videos">
+        {% for video in row.videos %}{% include "partials/_card.html" %}{% endfor %}
+      </div>
+    {% else %}
+      {% include "partials/_empty.html" with message="New videos for this section are coming soon, In shaa Allah." %}
+    {% endif %}
+  </div>
+</section>

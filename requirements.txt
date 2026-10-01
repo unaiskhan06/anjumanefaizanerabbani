@@ -1,0 +1,10 @@
+Django>=5.2.8,<6.0
+whitenoise>=6.9,<7
+python-dotenv>=1.0,<2
+dj-database-url>=2.2,<4
+Pillow>=11.0
+psycopg[binary]>=3.2,<4
+gunicorn>=23.0
+# Optional: media uploads on Cloudinary in production (enabled when CLOUDINARY_URL is set)
+cloudinary>=1.40,<2
+django-cloudinary-storage==0.3.0

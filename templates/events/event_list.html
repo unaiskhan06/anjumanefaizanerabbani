@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+{% block meta_description %}Upcoming and past Mehfil-e-Naat, Bayan and Urs events by {{ SITE_DISPLAY_NAME }}, Chennai — dates, venues and live stream links.{% endblock %}
+{% block og_title %}Events — {{ SITE_DISPLAY_NAME }}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading="Events" heading_urdu="پروگرام" subheading="Join us in person or watch live." crumbs="Events" %}
+<section class="section" aria-labelledby="upcoming-title">
+  <div class="container">
+    <h2 class="section-title" id="upcoming-title">Upcoming events <span class="section-urdu" lang="ur" dir="rtl">آنے والے پروگرام</span></h2>
+    {% if upcoming %}
+      <div class="event-list">
+        {% for event in upcoming %}{% include "events/_event_card.html" %}{% endfor %}
+      </div>
+    {% else %}
+      {% include "partials/_empty.html" with message="No upcoming events right now. Follow our YouTube channel for announcements." icon="i-calendar" %}
+    {% endif %}
+  </div>
+</section>
+
+<section class="section section-alt" id="past" aria-labelledby="past-title">
+  <div class="container">
+    <h2 class="section-title" id="past-title">Past events <span class="section-urdu" lang="ur" dir="rtl">گزشتہ پروگرام</span></h2>
+    {% if page_obj.object_list %}
+      <div class="event-list event-list--grid">
+        {% for event in page_obj %}{% include "events/_event_card.html" with past=True %}{% endfor %}
+      </div>
+      {% include "partials/_pager.html" with pager_anchor="#past" %}
+    {% else %}
+      {% include "partials/_empty.html" with message="Past events will be listed here." icon="i-calendar" %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

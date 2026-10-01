@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:"ANJUMANEFAIZANERABBANI admin" }}{% endblock %}
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    :root, html[data-theme="light"] {
+      --primary: #0369a1; --secondary: #0284c7; --header-bg: #0a0a0a; --header-link-color: #e0f2fe;
+      --breadcrumbs-bg: #0284c7; --link-fg: #0369a1; --link-hover-color: #075985;
+      --button-bg: #0369a1; --button-hover-bg: #075985; --default-button-bg: #0284c7; --default-button-hover-bg: #0369a1;
+    }
+  </style>
+{% endblock %}
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}" style="display:flex;align-items:center;gap:10px">
+  <img src="{% static 'img/logo-sm.png' %}" alt="" width="36" height="36" style="border-radius:50%">
+  {{ site_header|default:_('Django administration') }}</a></div>
+{% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
+{% endblock %}
+{% block nav-global %}{% endblock %}

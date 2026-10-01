@@ -1,0 +1,5 @@
+<div class="empty-state">
+  <svg class="icon icon-lg" aria-hidden="true"><use href="#{{ icon|default:'i-play' }}"/></svg>
+  <p>{{ message|default:"Nothing here yet — please check back soon." }}</p>
+  {% if link_url %}<a class="btn btn-outline" href="{{ link_url }}">{{ link_text|default:"Go back home" }}</a>{% endif %}
+</div>

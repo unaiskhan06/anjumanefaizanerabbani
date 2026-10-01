@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load site_tags %}
+{% block title %}{{ category.name }} Videos{% if page_obj.number > 1 %} (Page {{ page_obj.number }}){% endif %}{% endblock %}
+{% block meta_description %}{% if category.description %}{{ category.description|truncatechars:155 }}{% else %}Watch {{ category.name }} videos from {{ SITE_DISPLAY_NAME }}.{% endif %}{% endblock %}
+{% block og_title %}{{ category.name }} — {{ SITE_DISPLAY_NAME }}{% endblock %}
+{% block og_image %}{% if category.image %}{{ category.image.url|absolute:request }}{% elif page_obj.object_list %}{{ page_obj.object_list.0.thumbnail|absolute:request }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading=category.name heading_urdu=category.name_urdu subheading=category.description crumbs=category.name %}
+<section class="section">
+  <div class="container">
+    {% if page_obj.object_list %}
+      <div class="grid video-grid">
+        {% for video in page_obj %}{% include "partials/_card.html" %}{% endfor %}
+      </div>
+      {% include "partials/_pager.html" %}
+    {% elif not shorts_row %}
+      {% url 'videos:categories' as cats_url %}
+      {% include "partials/_empty.html" with message="No videos in this category yet — please check back soon." link_url=cats_url link_text="Browse other categories" %}
+    {% endif %}
+  </div>
+</section>
+{% if shorts_row %}{% include "partials/_video_row.html" with row=shorts_row %}{% endif %}
+{% endblock %}

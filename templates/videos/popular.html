@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Popular Videos{% if page_obj.number > 1 %} (Page {{ page_obj.number }}){% endif %}{% endblock %}
+{% block meta_description %}The most loved and most watched Naat Sharif and Bayan videos from {{ SITE_DISPLAY_NAME }}.{% endblock %}
+{% block og_title %}Popular Videos — {{ SITE_DISPLAY_NAME }}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading="Popular" heading_urdu="مقبول ویڈیوز" subheading="Featured picks first, then the most watched videos." crumbs="Popular" %}
+<section class="section">
+  <div class="container">
+    {% if page_obj.object_list %}
+      <div class="grid video-grid">
+        {% for video in page_obj %}
+          <div class="ranked">
+            {% if video.is_featured %}<span class="badge badge-featured">★ Featured</span>{% endif %}
+            {% include "partials/_card.html" %}
+          </div>
+        {% endfor %}
+      </div>
+      {% include "partials/_pager.html" %}
+    {% else %}
+      {% include "partials/_empty.html" with message="Popular videos will appear here soon." link_url="/" %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

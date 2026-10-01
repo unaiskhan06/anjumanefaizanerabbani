@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Playlists{% endblock %}
+{% block meta_description %}Open the {{ SITE_NAME }} YouTube channel and playlists — Naat Sharif, Bayan, live programs and more.{% endblock %}
+{% block og_title %}Playlists — {{ SITE_DISPLAY_NAME }}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading="Playlists" heading_urdu="پلے لسٹ" subheading="Our YouTube channel and playlists (these open on YouTube)." crumbs="Playlists" %}
+<section class="section">
+  <div class="container">
+    {% if page_obj.object_list %}
+      <div class="grid playlist-grid">
+        {% for item in page_obj %}
+        <a class="playlist-card" href="{{ item.url }}" target="_blank" rel="noopener">
+          <div class="playlist-thumb">
+            {% if item.image %}<img src="{{ item.image.url }}" alt="" loading="lazy" decoding="async">
+            {% else %}<img src="{% static 'img/logo-sm.png' %}" alt="" class="playlist-logo" loading="lazy">{% endif %}
+            <span class="playlist-overlay"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg> Open</span>
+          </div>
+          <h2 class="playlist-name">{{ item.name }}</h2>
+          <span class="playlist-cta"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-youtube"/></svg> View on YouTube</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% include "partials/_pager.html" %}
+    {% else %}
+      {% include "partials/_empty.html" with message="Playlists will be listed here soon." icon="i-list" %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

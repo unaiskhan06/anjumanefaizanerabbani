@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static site_tags humanize %}
+{% block title %}{{ video.title }}{% endblock %}
+{% block meta_description %}{% if video.description %}{{ video.description|striptags|truncatechars:155 }}{% else %}Watch “{{ video.title }}” — {{ video.category.name }} from {{ SITE_DISPLAY_NAME }}.{% endif %}{% endblock %}
+{% block canonical %}{{ share_url }}{% endblock %}
+{% block og_type %}video.other{% endblock %}
+{% block og_title %}{{ video.title }}{% endblock %}
+{% block og_description %}{% if video.description %}{{ video.description|striptags|truncatechars:200 }}{% else %}{{ video.category.name }} — {{ SITE_DISPLAY_NAME }}{% endif %}{% endblock %}
+{% block og_image %}{{ video.thumbnail|absolute:request }}{% endblock %}
+{% block tw_title %}{{ video.title }}{% endblock %}
+{% block tw_image %}{{ video.thumbnail|absolute:request }}{% endblock %}
+{% block extra_meta %}
+  <meta property="og:image:width" content="480">
+  <meta property="og:image:height" content="360">
+  <meta property="og:video:url" content="https://www.youtube.com/embed/{{ video.youtube_id }}">
+  {% if not video.published %}<meta name="robots" content="noindex">{% endif %}
+  <script type="application/ld+json">{{ jsonld }}</script>
+{% endblock %}
+{% block extra_head %}
+  <link rel="preload" as="image" href="{{ video.thumbnail }}">
+{% endblock %}
+
+{% block content %}
+<article class="video-page">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="{% url 'core:home' %}">Home</a> <span aria-hidden="true">/</span>
+      <a href="{{ video.category.get_absolute_url }}">{{ video.category.name }}</a> <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ video.title|truncatechars:50 }}</span>
+    </nav>
+
+    {% if not video.published %}
+      <div class="message message--warning">This video is unpublished. Only staff can see this preview.</div>
+    {% endif %}
+
+    <div class="video-layout{% if video.is_short %} video-layout--short{% endif %}">
+      <div class="video-main">
+        <div class="player{% if video.is_short %} player--short{% endif %}" data-player
+             data-embed="{{ video.embed_url }}" data-title="{{ video.title }}">
+          <button class="player-facade" type="button" aria-label="Play video: {{ video.title }}">
+            <img class="player-thumb" src="{{ video.thumbnail }}" {% if not video.custom_thumbnail %}data-hq="{{ video.thumbnail_large }}"{% endif %}
+                 alt="" width="1280" height="720" decoding="async">
+            <span class="player-play" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>
+          </button>
+          <noscript>
+            <iframe src="{{ video.embed_url }}" title="{{ video.title }}" allowfullscreen
+                    referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          </noscript>
+        </div>
+
+        <header class="video-info">
+          <div class="video-badges">
+            {% if video.is_live %}<span class="badge badge-live">● LIVE</span>{% endif %}
+            <a class="badge badge-cat" href="{{ video.category.get_absolute_url }}">{{ video.category.name }}</a>
+            {% if video.is_featured %}<span class="badge badge-featured">★ Featured</span>{% endif %}
+          </div>
+          <h1 class="video-title">{{ video.title }}</h1>
+          {% if video.title_urdu %}<p class="video-urdu" lang="ur" dir="rtl">{{ video.title_urdu }}</p>{% endif %}
+          <ul class="video-meta">
+            {% if video.artist %}<li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-user"/></svg> {{ video.artist }}</li>{% endif %}
+            <li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-calendar"/></svg> <time datetime="{{ video.created_at|date:'c' }}">{{ video.created_at|date:"d M Y" }}</time></li>
+            <li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-eye"/></svg> {{ video.views|intcomma }} view{{ video.views|pluralize }}</li>
+          </ul>
+        </header>
+
+        <div class="share" aria-label="Share this video">
+          <a class="btn btn-whatsapp" href="https://wa.me/?text={{ video.title|urlencode }}%20{{ share_url|urlencode }}" target="_blank" rel="noopener">
+            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-whatsapp"/></svg> WhatsApp
+          </a>
+          <a class="btn btn-facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" rel="noopener">
+            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-facebook"/></svg> Facebook
+          </a>
+          <button class="btn btn-outline" type="button" data-copy="{{ share_url }}">
+            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-link"/></svg> <span data-copy-label>Copy link</span>
+          </button>
+          <button class="btn btn-outline" type="button" data-native-share data-share-title="{{ video.title }}" data-share-url="{{ share_url }}" hidden>
+            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-share"/></svg> Share
+          </button>
+          <a class="btn btn-youtube" href="{{ video.watch_url }}" target="_blank" rel="noopener">
+            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-youtube"/></svg> Watch on YouTube
+          </a>
+        </div>
+
+        {% if video.description %}
+        <section class="video-description" aria-label="Description">
+          {{ video.description|urlize|linebreaks }}
+        </section>
+        {% endif %}
+
+        <nav class="prev-next" aria-label="More videos in {{ video.category.name }}">
+          {% if previous_video %}
+          <a class="prev-next-link" href="{{ previous_video.get_absolute_url }}" rel="prev">
+            <span class="prev-next-label">← Previous</span>
+            <span class="prev-next-title">{{ previous_video.title|truncatechars:70 }}</span>
+          </a>
+          {% else %}<span></span>{% endif %}
+          {% if next_video %}
+          <a class="prev-next-link prev-next-link--next" href="{{ next_video.get_absolute_url }}" rel="next">
+            <span class="prev-next-label">Next →</span>
+            <span class="prev-next-title">{{ next_video.title|truncatechars:70 }}</span>
+          </a>
+          {% endif %}
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="more" aria-labelledby="more-title">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title" id="more-title">More from {{ video.category.name }}
+          {% if video.category.name_urdu %}<span class="section-urdu" lang="ur" dir="rtl">{{ video.category.name_urdu }}</span>{% endif %}
+        </h2>
+        <a class="link-more" href="{{ video.category.get_absolute_url }}">Show all →</a>
+      </div>
+      {% if page_obj.object_list %}
+        <div class="grid video-grid">
+          {% for video in page_obj %}{% include "partials/_card.html" %}{% endfor %}
+        </div>
+        {% include "partials/_pager.html" with pager_anchor="#more" %}
+      {% else %}
+        {% include "partials/_empty.html" with message="More videos in this category are coming soon." %}
+      {% endif %}
+    </div>
+  </section>
+</article>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/player.js' %}" defer></script>{% endblock %}

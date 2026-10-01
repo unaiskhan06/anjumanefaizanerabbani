@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Audio Naats &amp; Bayan{% endblock %}
+{% block meta_description %}Listen to Naat Sharif and Bayan audio from {{ SITE_DISPLAY_NAME }} with our simple audio player.{% endblock %}
+{% block og_title %}Audio — {{ SITE_DISPLAY_NAME }}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading="Audio" heading_urdu="آڈیو" subheading="Listen to naats and bayanaat. Tracks play one after another." crumbs="Audio" %}
+<section class="section">
+  <div class="container">
+    {% if page_obj.object_list %}
+    <div class="audio-player" data-audio-player>
+      <audio preload="metadata" data-audio></audio>
+      <div class="ap-now">
+        <span class="ap-art" aria-hidden="true"><svg class="icon"><use href="#i-music"/></svg></span>
+        <div>
+          <p class="ap-title" data-ap-title>Select a track</p>
+          <p class="ap-artist" data-ap-artist></p>
+        </div>
+      </div>
+      <div class="ap-controls">
+        <button class="ap-btn" type="button" aria-label="Previous track" data-ap-prev><svg class="icon" aria-hidden="true"><use href="#i-prev"/></svg></button>
+        <button class="ap-btn ap-play" type="button" aria-label="Play" data-ap-play>
+          <svg class="icon icon-play" aria-hidden="true"><use href="#i-play"/></svg>
+          <svg class="icon icon-pause" aria-hidden="true"><use href="#i-pause"/></svg>
+        </button>
+        <button class="ap-btn" type="button" aria-label="Next track" data-ap-next><svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></button>
+      </div>
+      <div class="ap-seek">
+        <span class="ap-time" data-ap-current>0:00</span>
+        <input type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek" data-ap-seek>
+        <span class="ap-time" data-ap-duration>0:00</span>
+      </div>
+      <div class="ap-volume">
+        <button class="ap-btn ap-btn-sm" type="button" aria-label="Mute" data-ap-mute>
+          <svg class="icon icon-vol" aria-hidden="true"><use href="#i-volume"/></svg>
+          <svg class="icon icon-mute" aria-hidden="true"><use href="#i-mute"/></svg>
+        </button>
+        <input type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume" data-ap-volume>
+      </div>
+    </div>
+
+    <ol class="playlist" data-ap-list aria-label="Playlist">
+      {% for track in page_obj %}
+      <li>
+        <button type="button" class="playlist-item" data-src="{{ track.audio_file.url }}" data-title="{{ track.title }}" data-artist="{{ track.artist }}">
+          <span class="playlist-num">{{ forloop.counter }}</span>
+          <span class="playlist-text"><span class="playlist-title">{{ track.title }}</span>
+          {% if track.artist %}<span class="playlist-artist">{{ track.artist }}</span>{% endif %}</span>
+          <span class="playlist-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+        </button>
+      </li>
+      {% endfor %}
+    </ol>
+    {% include "partials/_pager.html" %}
+    {% else %}
+      {% include "partials/_empty.html" with message="Audio tracks will be added soon. Meanwhile, enjoy our videos." icon="i-music" link_url="/" link_text="Watch videos" %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/audio.js' %}" defer></script>{% endblock %}

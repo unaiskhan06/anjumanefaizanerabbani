@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static site_tags %}
+{% block title %}Gallery{% if page_obj.number > 1 %} (Page {{ page_obj.number }}){% endif %}{% endblock %}
+{% block meta_description %}Photos from Mehfil-e-Naat, Bayan and community programs of {{ SITE_DISPLAY_NAME }}, Chennai.{% endblock %}
+{% block og_title %}Photo Gallery — {{ SITE_DISPLAY_NAME }}{% endblock %}
+{% block og_image %}{% if page_obj.object_list %}{{ page_obj.object_list.0.image.url|absolute:request }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading="Gallery" heading_urdu="تصاویر" subheading="Tap a photo to view it full screen." crumbs="Gallery" %}
+<section class="section">
+  <div class="container">
+    {% if page_obj.object_list %}
+      <ul class="masonry" data-lightbox-group>
+        {% for item in page_obj %}
+        <li class="masonry-item">
+          <a href="{{ item.image.url }}" data-lightbox data-caption="{{ item.caption }}">
+            <img src="{{ item.image.url }}" alt="{{ item.caption|default:'Gallery photo' }}" loading="lazy" decoding="async">
+            {% if item.caption %}<span class="masonry-caption">{{ item.caption }}</span>{% endif %}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% include "partials/_pager.html" %}
+    {% else %}
+      {% include "partials/_empty.html" with message="Photos will be added soon." %}
+    {% endif %}
+  </div>
+</section>
+
+{% include "partials/_lightbox.html" %}
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/lightbox.js' %}" defer></script>{% endblock %}

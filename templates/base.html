@@ -1,0 +1,169 @@
+{% load static site_tags %}<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}{{ SITE_DISPLAY_NAME }}{% endblock %} | {{ SITE_NAME }}</title>
+  <meta name="description" content="{% block meta_description %}{{ SITE_DISPLAY_NAME }} ({{ SITE_URDU_NAME }}) — Naat Sharif, Bayan, Hamd and spiritual gatherings from Chennai. Watch the ANJUMANEFAIZANERABBANI YouTube channel here.{% endblock %}">
+  <link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
+  <meta name="theme-color" content="#0284c7">
+
+  {# Open Graph / Twitter (WhatsApp uses og:image) #}
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{{ SITE_DISPLAY_NAME }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Naat Sharif, Bayan and spiritual content from {{ SITE_DISPLAY_NAME }}, Chennai.{% endblock %}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  {% static 'img/og-default.jpg' as default_og %}
+  <meta property="og:image" content="{% block og_image %}{{ default_og|absolute:request }}{% endblock %}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block tw_title %}{{ SITE_DISPLAY_NAME }}{% endblock %}">
+  <meta name="twitter:image" content="{% block tw_image %}{{ default_og|absolute:request }}{% endblock %}">
+  {% block extra_meta %}{% endblock %}
+
+  <link rel="icon" type="image/png" sizes="64x64" href="{% static 'img/favicon.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://img.youtube.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Figtree:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (!t) t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  {% include "partials/_icons.html" %}
+
+  {% with view=request.resolver_match.view_name %}
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="{% url 'core:home' %}" aria-label="{{ SITE_DISPLAY_NAME }} — Home">
+        <img class="brand-logo" src="{% static 'img/logo-sm.png' %}" alt="" width="48" height="48">
+        <span class="brand-text">
+          <span class="brand-en">Anjuman-e-Faizan-e-Rabbani</span>
+          <span class="brand-ur" lang="ur" dir="rtl">انجمنِ فیضانِ ربانی</span>
+        </span>
+      </a>
+
+      <div class="header-actions">
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode" title="Dark / light mode">
+          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+          <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+        </button>
+        <button class="icon-btn nav-toggle" type="button" aria-controls="site-nav" aria-expanded="false" aria-label="Open menu" data-nav-toggle>
+          <svg class="icon icon-menu" aria-hidden="true"><use href="#i-menu"/></svg>
+          <svg class="icon icon-close" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </div>
+
+      <nav class="site-nav" id="site-nav" aria-label="Main navigation">
+        <ul class="nav-list">
+          <li><a href="{% url 'core:home' %}" {% if view == 'core:home' %}aria-current="page"{% endif %}>Home</a></li>
+          <li><a href="{% url 'videos:categories' %}" {% if view == 'videos:categories' or view == 'videos:category' or view == 'videos:detail' %}aria-current="page"{% endif %}>Categories</a></li>
+          <li><a href="{% url 'videos:popular' %}" {% if view == 'videos:popular' %}aria-current="page"{% endif %}>Popular</a></li>
+          <li><a href="{% url 'core:playlists' %}" {% if view == 'core:playlists' %}aria-current="page"{% endif %}>Playlists</a></li>
+          <li><a href="{% url 'events:list' %}" {% if view == 'events:list' %}aria-current="page"{% endif %}>Events</a></li>
+          <li><a href="{% url 'core:about' %}" {% if view == 'core:about' %}aria-current="page"{% endif %}>About</a></li>
+          <li class="has-dropdown">
+            <button class="dropdown-toggle" type="button" aria-expanded="false" aria-controls="more-menu" data-dropdown>
+              More <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+            </button>
+            <ul class="dropdown" id="more-menu">
+              <li><a href="{% url 'gallery:audio' %}" {% if view == 'gallery:audio' %}aria-current="page"{% endif %}>Audio <span lang="ur">آڈیو</span></a></li>
+              <li><a href="{% url 'gallery:gallery' %}" {% if view == 'gallery:gallery' %}aria-current="page"{% endif %}>Gallery <span lang="ur">گیلری</span></a></li>
+              <li><a href="{% url 'videos:search' %}" {% if view == 'videos:search' %}aria-current="page"{% endif %}>Search <span lang="ur">تلاش</span></a></li>
+              <li><a href="{% url 'contact:contact' %}" {% if view == 'contact:contact' %}aria-current="page"{% endif %}>Contact <span lang="ur">رابطہ</span></a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <form class="search-form header-search" action="{% url 'videos:search' %}" method="get" role="search">
+          <label class="visually-hidden" for="header-q">Search videos</label>
+          <input id="header-q" type="search" name="q" placeholder="Search naat, bayan…" autocomplete="off"
+                 value="{{ query|default:'' }}" data-suggest>
+          <button type="submit" aria-label="Search"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></button>
+        </form>
+
+        {% include "partials/_social.html" with extra_class="header-social" %}
+      </nav>
+    </div>
+  </header>
+  {% endwith %}
+
+  {% if messages %}
+  <div class="container messages" role="status" aria-live="polite">
+    {% for message in messages %}
+      <div class="message message--{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main id="main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer pattern-bg">
+    <div class="container footer-grid">
+      <div class="footer-about">
+        <a class="brand brand--footer" href="{% url 'core:home' %}">
+          <img class="brand-logo" src="{% static 'img/logo-sm.png' %}" alt="" width="56" height="56" loading="lazy">
+          <span class="brand-text">
+            <span class="brand-en">Anjuman-e-Faizan-e-Rabbani</span>
+            <span class="brand-ur" lang="ur" dir="rtl">انجمنِ فیضانِ ربانی</span>
+          </span>
+        </a>
+        <p>{{ site.tagline|default:"Naat, Bayan and spiritual gatherings from Chennai." }}</p>
+        {% if site.youtube_url %}
+        <a class="btn btn-youtube" href="{{ site.youtube_url }}?sub_confirmation=1" target="_blank" rel="noopener">
+          <svg class="icon" aria-hidden="true"><use href="#i-youtube"/></svg> Subscribe on YouTube
+        </a>
+        {% endif %}
+      </div>
+      <div>
+        <h2 class="footer-title">Quick links</h2>
+        <ul class="footer-links">
+          <li><a href="{% url 'videos:categories' %}">Categories</a></li>
+          <li><a href="{% url 'videos:popular' %}">Popular videos</a></li>
+          <li><a href="{% url 'core:playlists' %}">Playlists</a></li>
+          <li><a href="{% url 'events:list' %}">Events</a></li>
+          <li><a href="{% url 'gallery:audio' %}">Audio</a></li>
+          <li><a href="{% url 'gallery:gallery' %}">Gallery</a></li>
+          <li><a href="{% url 'core:about' %}">About us</a></li>
+          <li><a href="{% url 'contact:contact' %}">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="footer-title">Contact</h2>
+        <ul class="footer-contact">
+          <li><strong>{{ site.committee_name }}</strong></li>
+          {% if site.phone %}<li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-phone"/></svg> {{ site.phone_label }}: <a href="tel:{{ site.phone|cut:' ' }}">{{ site.phone }}</a></li>{% endif %}
+          {% if site.phone2 %}<li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-phone"/></svg> {{ site.phone2_label }}: <a href="tel:{{ site.phone2|cut:' ' }}">{{ site.phone2 }}</a></li>{% endif %}
+          {% if site.email %}<li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-mail"/></svg> <a href="mailto:{{ site.email }}">{{ site.email }}</a></li>{% endif %}
+          {% if site.address %}<li><svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg> {{ site.address|linebreaksbr }}</li>{% endif %}
+        </ul>
+        {% include "partials/_social.html" with extra_class="footer-social" %}
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>&copy; {% now "Y" %} {{ SITE_NAME }} — {{ SITE_DISPLAY_NAME }}. All videos, audio and images belong to the channel. All rights reserved.</p>
+        <a class="back-to-top" href="#top">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/main.js' %}" defer></script>
+  <script src="{% static 'js/search.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Categories{% endblock %}
+{% block meta_description %}Browse Naat Sharif, Hamd, Bayan, Tasawwuf, Kids Special and more video categories from {{ SITE_DISPLAY_NAME }}.{% endblock %}
+{% block og_title %}Video Categories — {{ SITE_DISPLAY_NAME }}{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading="Categories" heading_urdu="زمرے" subheading="Choose a category to explore our videos." crumbs="Categories" %}
+<section class="section">
+  <div class="container">
+    {% if page_obj.object_list %}
+    <div class="grid category-grid">
+      {% for category in page_obj %}
+      <a class="category-card" href="{{ category.get_absolute_url }}">
+        <div class="category-thumb">
+          {% if category.image %}
+            <img src="{{ category.image.url }}" alt="" loading="lazy" decoding="async">
+          {% elif category.latest_youtube_id %}
+            <img src="https://img.youtube.com/vi/{{ category.latest_youtube_id }}/hqdefault.jpg" alt="" loading="lazy" decoding="async">
+          {% else %}
+            <span class="category-placeholder pattern-bg" aria-hidden="true"></span>
+          {% endif %}
+        </div>
+        <div class="category-body">
+          <h2 class="category-name">{{ category.name }}</h2>
+          {% if category.name_urdu %}<p class="category-urdu" lang="ur" dir="rtl">{{ category.name_urdu }}</p>{% endif %}
+          <p class="card-meta">{{ category.video_total }} video{{ category.video_total|pluralize }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% include "partials/_pager.html" %}
+    {% else %}
+      {% include "partials/_empty.html" with message="No categories have been added yet." icon="i-folder" %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

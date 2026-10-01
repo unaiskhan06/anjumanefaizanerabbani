@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Page not found{% endblock %}
+{% block extra_meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<section class="error-page pattern-bg">
+  <div class="container error-inner">
+    <p class="error-code">404</p>
+    <h1>Page not found</h1>
+    <p lang="ur" dir="rtl" class="error-urdu">معذرت، یہ صفحہ موجود نہیں ہے</p>
+    <p>The page you are looking for may have been moved or removed.</p>
+    <form class="search-form search-page-form" action="{% url 'videos:search' %}" method="get" role="search">
+      <label class="visually-hidden" for="nf-q">Search videos</label>
+      <input id="nf-q" type="search" name="q" placeholder="Search videos…">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    <a class="btn btn-outline" href="{% url 'core:home' %}">Go to home page</a>
+  </div>
+</section>
+{% endblock %}

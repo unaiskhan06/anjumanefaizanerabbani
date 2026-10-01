@@ -1,0 +1,7 @@
+<header class="page-header">
+  <div class="container">
+    {% if crumbs %}<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'core:home' %}">Home</a> <span aria-hidden="true">/</span> {{ crumbs }}</nav>{% endif %}
+    <h1 class="page-title">{{ heading }}{% if heading_urdu %} <span class="page-urdu" lang="ur" dir="rtl">{{ heading_urdu }}</span>{% endif %}</h1>
+    {% if subheading %}<p class="page-sub">{{ subheading }}</p>{% endif %}
+  </div>
+</header>

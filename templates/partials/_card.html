@@ -1,0 +1,18 @@
+<article class="card{% if video.is_short %} card--short{% endif %}">
+  <a class="card-link" href="{{ video.get_absolute_url }}">
+    <div class="card-thumb">
+      <img src="{{ video.thumbnail }}" alt="" loading="lazy" decoding="async" width="480" height="360">
+      <span class="card-play" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>
+      {% if video.is_live %}<span class="badge badge-live">● LIVE</span>{% elif video.is_short %}<span class="badge">Short</span>{% endif %}
+    </div>
+    <div class="card-body">
+      <h3 class="card-title">{{ video.title }}</h3>
+      {% if video.title_urdu %}<p class="card-urdu" lang="ur" dir="rtl">{{ video.title_urdu }}</p>{% endif %}
+      <p class="card-meta">
+        <span>{{ video.category.name }}</span>
+        <span aria-hidden="true">·</span>
+        <span>{{ video.views }} view{{ video.views|pluralize }}</span>
+      </p>
+    </div>
+  </a>
+</article>

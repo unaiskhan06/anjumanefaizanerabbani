@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{% if query %}Search: {{ query }}{% else %}Search{% endif %}{% endblock %}
+{% block meta_description %}Search Naat Sharif, Bayan and other videos from {{ SITE_DISPLAY_NAME }} by title, Urdu title, artist or category.{% endblock %}
+{% block extra_meta %}<meta name="robots" content="noindex, follow">{% endblock %}
+
+{% block content %}
+{% include "partials/_page_header.html" with heading="Search" heading_urdu="تلاش" crumbs="Search" %}
+<section class="section">
+  <div class="container">
+    <form class="search-form search-page-form" action="{% url 'videos:search' %}" method="get" role="search">
+      <label class="visually-hidden" for="page-q">Search videos</label>
+      <input id="page-q" type="search" name="q" value="{{ query }}" placeholder="Title, Urdu title, artist or category…"
+             autocomplete="off" data-suggest {% if not query %}autofocus{% endif %}>
+      <button type="submit" class="btn btn-primary">
+        <svg class="icon icon-sm" aria-hidden="true"><use href="#i-search"/></svg> Search
+      </button>
+    </form>
+
+    {% if query %}
+      <p class="results-count" role="status">
+        {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for “<strong>{{ query }}</strong>”
+      </p>
+      {% if page_obj.object_list %}
+        <div class="grid video-grid">
+          {% for video in page_obj %}{% include "partials/_card.html" %}{% endfor %}
+        </div>
+        {% include "partials/_pager.html" %}
+      {% else %}
+        {% url 'videos:categories' as cats_url %}
+        {% include "partials/_empty.html" with message="No videos matched your search. Try a different word or browse the categories." icon="i-search" link_url=cats_url link_text="Browse categories" %}
+      {% endif %}
+    {% else %}
+      {% include "partials/_empty.html" with message="Type a naat title, reciter name or category to begin." icon="i-search" %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

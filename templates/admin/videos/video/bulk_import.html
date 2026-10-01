@@ -1,0 +1,56 @@
+{% extends "admin/base_site.html" %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a> &rsaquo;
+  <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a> &rsaquo;
+  <a href="{{ changelist_url }}">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+  Bulk import
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <p>Paste many YouTube links below — <strong>one per line</strong>. Choose the category and press <em>Import</em>.
+     Titles are fetched from YouTube automatically (this can take a few seconds for long lists).</p>
+
+  {% if report %}
+  <div class="module" style="padding:12px 16px;margin-bottom:20px">
+    <h2 style="margin:-12px -16px 12px;">Import result</h2>
+    <p><strong>{{ report.created|length }}</strong> created ·
+       <strong>{{ report.duplicates|length }}</strong> duplicates skipped ·
+       <strong>{{ report.invalid|length }}</strong> invalid lines</p>
+    {% if report.created %}
+      <h3>Created</h3>
+      <ul>{% for v in report.created %}<li><a href="{% url 'admin:videos_video_change' v.pk %}">{{ v.title }}</a> <small>({{ v.youtube_id }})</small></li>{% endfor %}</ul>
+    {% endif %}
+    {% if report.duplicates %}
+      <h3>Duplicates (skipped)</h3>
+      <ul>{% for line in report.duplicates %}<li>{{ line }}</li>{% endfor %}</ul>
+    {% endif %}
+    {% if report.invalid %}
+      <h3 style="color:#ba2121">Invalid lines (not YouTube links)</h3>
+      <ul>{% for line in report.invalid %}<li><code>{{ line }}</code></li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      {% for field in form %}
+      <div class="form-row{% if field.errors %} errors{% endif %}">
+        {{ field.errors }}
+        <div class="flex-container">
+          {{ field.label_tag }} {{ field }}
+        </div>
+        {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" class="default" value="Import videos">
+      <a href="{{ changelist_url }}" class="closelink">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% load site_tags %}
+{% if page_obj.has_other_pages %}
+<nav class="pager" aria-label="{{ pager_label|default:'Pagination' }}">
+  {% if page_obj.has_previous %}
+    <a class="pager-btn" href="{% page_url page_obj.previous_page_number %}{{ pager_anchor }}" rel="prev">
+      <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-left"/></svg> Previous
+    </a>
+  {% else %}
+    <span class="pager-btn is-disabled" aria-disabled="true">
+      <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-left"/></svg> Previous
+    </span>
+  {% endif %}
+
+  <ol class="pager-pages">
+    {% for n in page_obj.paginator.get_elided_page_range %}
+      {% if n == page_obj.paginator.ELLIPSIS %}
+        <li><span class="pager-ellipsis">…</span></li>
+      {% elif n == page_obj.number %}
+        <li><span class="pager-num is-current" aria-current="page">{{ n }}</span></li>
+      {% else %}
+        <li><a class="pager-num" href="{% page_url n %}{{ pager_anchor }}" aria-label="Page {{ n }}">{{ n }}</a></li>
+      {% endif %}
+    {% endfor %}
+  </ol>
+
+  {% if page_obj.has_next %}
+    <a class="pager-btn" href="{% page_url page_obj.next_page_number %}{{ pager_anchor }}" rel="next">
+      Next <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+    </a>
+  {% else %}
+    <span class="pager-btn is-disabled" aria-disabled="true">
+      Next <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+    </span>
+  {% endif %}
+</nav>
+{% endif %}

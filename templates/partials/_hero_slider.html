@@ -1,0 +1,48 @@
+{% load static %}
+<section class="hero pattern-bg" aria-roledescription="carousel" aria-label="Highlights">
+  {% if banners %}
+  <div class="slider" data-slider data-interval="6000">
+    <div class="slides">
+      {% for banner in banners %}
+      <div class="slide{% if forloop.first %} is-active{% endif %}" role="group" aria-roledescription="slide"
+           aria-label="{{ forloop.counter }} of {{ banners|length }}" {% if not forloop.first %}aria-hidden="true"{% endif %}>
+        <img class="slide-img" src="{{ banner.image.url }}" alt=""
+             {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async">
+        <div class="slide-overlay"></div>
+        <div class="container slide-content">
+          {% if banner.program_label %}<span class="slide-label">{{ banner.program_label }}</span>{% endif %}
+          <h2 class="slide-title">{{ banner.title }}</h2>
+          {% if banner.description %}<p class="slide-text">{{ banner.description }}</p>{% endif %}
+          {% if banner.link_url %}
+          <a class="btn btn-primary" href="{{ banner.link_url }}" {% if not forloop.first %}tabindex="-1"{% endif %}>
+            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-play"/></svg> Watch now
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% if banners|length > 1 %}
+    <button class="slider-arrow slider-prev" type="button" aria-label="Previous slide" data-slider-prev>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg>
+    </button>
+    <button class="slider-arrow slider-next" type="button" aria-label="Next slide" data-slider-next>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+    </button>
+    <div class="slider-dots" role="group" aria-label="Choose slide">
+      {% for banner in banners %}
+      <button type="button" class="slider-dot{% if forloop.first %} is-active{% endif %}" aria-label="Go to slide {{ forloop.counter }}"
+              {% if forloop.first %}aria-current="true"{% endif %} data-slider-dot="{{ forloop.counter0 }}"></button>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="container hero-fallback">
+    <img src="{% static 'img/logo-sm.png' %}" alt="" width="120" height="120">
+    <p class="hero-urdu" lang="ur" dir="rtl">انجمنِ فیضانِ ربانی</p>
+    <h1 class="hero-title">Anjuman-e-Faizan-e-Rabbani</h1>
+    <p class="hero-text">Naat Sharif, Bayan and spiritual gatherings — watch right here.</p>
+  </div>
+  {% endif %}
+</section>

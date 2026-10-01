@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Naat, Bayan &amp; Spiritual Videos{% endblock %}
+{% block body_class %}page-home{% endblock %}
+{% block extra_head %}{% if banners %}<link rel="preload" as="image" href="{{ banners.0.image.url }}">{% endif %}{% endblock %}
+
+{% block content %}
+{% if banners %}<h1 class="visually-hidden">{{ SITE_DISPLAY_NAME }} — {{ SITE_NAME }}</h1>{% endif %}
+{% include "partials/_hero_slider.html" %}
+
+{% if live_video %}
+<div class="container">
+  <a class="live-strip" href="{{ live_video.get_absolute_url }}">
+    <span class="badge badge-live">● LIVE NOW</span>
+    <span class="live-strip-title">{{ live_video.title }}</span>
+    <span class="live-strip-cta">Watch →</span>
+  </a>
+</div>
+{% endif %}
+
+{% if site.schedule_items or next_event %}
+<section class="schedule" aria-labelledby="schedule-title">
+  <div class="container schedule-inner">
+    <h2 class="schedule-title" id="schedule-title">
+      <svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>
+      Weekly Schedule <span lang="ur" dir="rtl">ہفتہ وار پروگرام</span>
+    </h2>
+    <ul class="schedule-list">
+      {% for item in site.schedule_items %}<li>{{ item }}</li>{% endfor %}
+      {% if next_event %}
+      <li class="schedule-event"><a href="{% url 'events:list' %}#event-{{ next_event.pk }}">Next event: <strong>{{ next_event.title }}</strong> — {{ next_event.date|date:"D, d M" }}</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+{% if announcements %}
+<section class="section announcements" aria-labelledby="announcements-title">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title" id="announcements-title">
+        <svg class="icon" aria-hidden="true"><use href="#i-megaphone"/></svg>
+        Announcements <span class="section-urdu" lang="ur" dir="rtl">اعلانات</span>
+      </h2>
+      {% if announcements|length > 1 %}
+      <div class="section-actions">
+        <button class="row-arrow" type="button" aria-label="Previous announcement" data-row-scroll="-1" aria-controls="track-announcements">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-left"/></svg>
+        </button>
+        <button class="row-arrow" type="button" aria-label="Next announcement" data-row-scroll="1" aria-controls="track-announcements">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+        </button>
+      </div>
+      {% endif %}
+    </div>
+    <ul class="announce-row{% if announcements|length == 1 %} announce-row--single{% endif %}" id="track-announcements" tabindex="0" aria-label="Announcements">
+      {% for item in announcements %}
+      <li class="announce-card">
+        {% if item.link_url %}
+        <a href="{{ item.link_url }}"{% if "://" in item.link_url %} target="_blank" rel="noopener"{% endif %}>
+        {% else %}
+        <a href="{{ item.image.url }}" data-lightbox data-caption="{{ item.title }}">
+        {% endif %}
+          <img src="{{ item.image.url }}" alt="{{ item.title }}" width="1600" height="900"
+               {% if not forloop.first %}loading="lazy" {% endif %}decoding="async">
+          <span class="announce-title">{{ item.title }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% include "partials/_lightbox.html" %}
+{% endif %}
+
+{% if categories %}
+<nav class="container chips-wrap" aria-label="Browse categories">
+  <ul class="chips">
+    {% for category in categories %}
+    <li><a class="chip" href="{{ category.get_absolute_url }}">{{ category.name }}{% if category.name_urdu %} <span lang="ur" dir="rtl">{{ category.name_urdu }}</span>{% endif %}</a></li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}
+
+{% for row in rows %}
+  {% include "partials/_video_row.html" %}
+{% endfor %}
+
+<section class="section">
+  <div class="container">
+    <div class="subscribe-banner pattern-bg">
+      <img src="{% static 'img/logo-sm.png' %}" alt="" width="96" height="96" loading="lazy">
+      <div>
+        <h2>Never miss a Naat or Bayan</h2>
+        <p lang="ur" dir="rtl" class="subscribe-urdu">ہمارے یوٹیوب چینل کو سبسکرائب کریں</p>
+        <p>Subscribe to <strong>{{ SITE_NAME }}</strong> on YouTube and turn on notifications for live programs.</p>
+      </div>
+      {% if site.youtube_url %}
+      <a class="btn btn-youtube btn-lg" href="{{ site.youtube_url }}?sub_confirmation=1" target="_blank" rel="noopener">
+        <svg class="icon" aria-hidden="true"><use href="#i-youtube"/></svg> Subscribe
+      </a>
+      {% endif %}
+    </div>
+
+    {% for channel in partner_channels %}
+    <div class="subscribe-banner subscribe-banner--partner pattern-bg">
+      <img src="{% if channel.image %}{{ channel.image.url }}{% else %}{% static 'img/logo-sm.png' %}{% endif %}"
+           alt="" width="96" height="96" loading="lazy">
+      <div>
+        <p class="subscribe-kicker">Also subscribe to</p>
+        <h2>{{ channel.name }}{% if channel.name_urdu %} <span lang="ur" dir="rtl" class="subscribe-name-urdu">{{ channel.name_urdu }}</span>{% endif %}</h2>
+        <p lang="ur" dir="rtl" class="subscribe-urdu">یہ چینل بھی سبسکرائب کریں</p>
+        {% if channel.tagline %}<p>{{ channel.tagline }}</p>{% endif %}
+      </div>
+      <a class="btn btn-youtube btn-lg" href="{{ channel.subscribe_url }}" target="_blank" rel="noopener"
+         aria-label="Subscribe to {{ channel.name }} on YouTube">
+        <svg class="icon" aria-hidden="true"><use href="#i-youtube"/></svg> Subscribe
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/slider.js' %}" defer></script>
+{% if announcements %}<script src="{% static 'js/lightbox.js' %}" defer></script>{% endif %}{% endblock %}
