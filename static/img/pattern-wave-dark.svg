@@ -1,0 +1,13 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='240' height='176' viewBox='0 0 240 176'>
+  <defs>
+    <filter id='b' x='-50%' y='-50%' width='200%' height='200%'><feGaussianBlur stdDeviation='3'/></filter>
+    <path id='c' fill='none' d='M64 38Q120 94 176 38M-56 126Q0 182 56 126M184 126Q240 182 296 126'/>
+    <path id='w' d='M90 0C90 32 30 56 30 88C27 56 78 32 90 0ZM30 88C30 120 90 144 90 176C93 144 42 120 30 88ZM150 0C150 32 210 56 210 88C213 56 162 32 150 0ZM210 88C210 120 150 144 150 176C147 144 198 120 210 88Z'/>
+    <path id='l' fill='none' d='M90 0C90 32 30 56 30 88S90 144 90 176M150 0C150 32 210 56 210 88S150 144 150 176'/>
+  </defs>
+  <use href='#c' stroke='#000000' stroke-opacity='.35' stroke-width='12' filter='url(#b)' transform='translate(0 -8)'/>
+  <use href='#c' stroke='#ffffff' stroke-opacity='.06' stroke-width='1.8'/>
+  <use href='#w' fill='#000000' fill-opacity='.55' filter='url(#b)'/>
+  <use href='#w' fill='#000000' fill-opacity='.85'/>
+  <use href='#l' stroke='#ffffff' stroke-opacity='.06' stroke-width='1.3'/>
+</svg>
