@@ -14,7 +14,6 @@ class SiteSetting(models.Model):
     youtube_url = models.URLField("YouTube channel", blank=True)
     facebook_url = models.URLField("Facebook", blank=True)
     instagram_url = models.URLField("Instagram", blank=True)
-    tiktok_url = models.URLField("TikTok", blank=True)
 
     whatsapp_number = models.CharField(max_length=20, blank=True,
                                        help_text="International format without + or spaces, e.g. 919791054168.")
@@ -26,9 +25,13 @@ class SiteSetting(models.Model):
     address = models.TextField(blank=True)
     map_embed_url = models.URLField(blank=True,
                                     help_text="Optional Google Maps embed link (Share → Embed a map → copy the src URL).")
+    map1_url = models.URLField("Map link 1", blank=True)
+    map1_label = models.CharField("Map label 1", max_length=120, blank=True)
+    map2_url = models.URLField("Map link 2", blank=True)
+    map2_label = models.CharField("Map label 2", max_length=120, blank=True)
 
-    weekly_schedule = models.TextField(blank=True,
-                                       help_text="One item per line, e.g. “Thursday 9 PM — Mehfil-e-Naat”.")
+    monthly_schedule = models.TextField("Monthly schedule", blank=True,
+                                        help_text="One item per line, e.g. “Sunday after Isha — Gyarvi Sharif Mehfil”.")
     about_text = models.TextField("About / Our story", blank=True)
     mission = models.TextField(blank=True)
     vision = models.TextField(blank=True)
@@ -57,7 +60,7 @@ class SiteSetting(models.Model):
 
     @property
     def schedule_items(self):
-        return [line.strip() for line in self.weekly_schedule.splitlines() if line.strip()]
+        return [line.strip() for line in self.monthly_schedule.splitlines() if line.strip()]
 
     @property
     def whatsapp_link(self):
@@ -143,3 +146,40 @@ class PartnerChannel(models.Model):
     @property
     def subscribe_url(self):
         return self.url.split("?")[0].rstrip("/") + "?sub_confirmation=1"
+
+
+class DonationInfo(models.Model):
+    """QR code and description for the Chanda (donation) section on the About page."""
+
+    title = models.CharField(max_length=200, default="Support Our Religious & Community Activities")
+    title_urdu = models.CharField("Title (Urdu/Arabic)", max_length=200, blank=True,
+                                  default="ہماری دینی و فلاحی سرگرمیوں میں تعاون کریں")
+    description = models.TextField(
+        blank=True,
+        default=(
+            "We humbly invite you to contribute towards our Chanda Collection and support our "
+            "religious, educational, and community welfare activities.\n\n"
+            "Your generous contribution, whether small or large, is a valuable means of supporting "
+            "these noble efforts. May Allah ﷻ accept your contribution, bless your wealth, and "
+            "reward you abundantly for your generosity. Ameen."
+        ),
+        help_text="Rich description shown above the QR code.",
+    )
+    qr_image = models.ImageField("QR code image", upload_to="donation/",
+                                 help_text="Upload the UPI / payment QR code image.")
+    upi_id = models.CharField("UPI ID", max_length=120, blank=True,
+                              help_text="e.g. anjumanefaizanerabbani2023@oksbi")
+    footer_note = models.CharField(max_length=300, blank=True,
+                                   default="جزاكم الله خيرًا — JazakAllahu Khairan — May Allah reward you with goodness.",
+                                   help_text="Short line shown below the QR code.")
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "donation / chanda info"
+        verbose_name_plural = "donation / chanda info"
+        ordering = ["-active", "-updated_at"]
+
+    def __str__(self):
+        return self.title

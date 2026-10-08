@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .models import Announcement, Banner, PartnerChannel, PlaylistLink, SiteSetting
+from .models import Announcement, Banner, DonationInfo, PartnerChannel, PlaylistLink, SiteSetting
 
 admin.site.site_header = f"{settings.SITE_DISPLAY_NAME} — Admin"
 admin.site.site_title = f"{settings.SITE_NAME} admin"
@@ -77,14 +77,38 @@ class PartnerChannelAdmin(admin.ModelAdmin):
         return image_preview(obj.image, 56)
 
 
+@admin.register(DonationInfo)
+class DonationInfoAdmin(admin.ModelAdmin):
+    list_display = ("qr_preview", "title", "upi_id", "active", "updated_at")
+    list_display_links = ("qr_preview", "title")
+    list_editable = ("active",)
+    list_filter = ("active",)
+    readonly_fields = ("qr_preview_large", "created_at", "updated_at")
+    fieldsets = (
+        (None, {"fields": ("title", "title_urdu", "description")}),
+        ("QR Code & UPI", {"fields": ("qr_image", "qr_preview_large", "upi_id")}),
+        ("Footer", {"fields": ("footer_note",)}),
+        ("Status", {"fields": ("active", "created_at", "updated_at")}),
+    )
+
+    @admin.display(description="")
+    def qr_preview(self, obj):
+        return image_preview(obj.qr_image, 80)
+
+    @admin.display(description="QR preview")
+    def qr_preview_large(self, obj):
+        return image_preview(obj.qr_image, 280)
+
+
 @admin.register(SiteSetting)
 class SiteSettingAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Identity", {"fields": ("committee_name", "tagline")}),
-        ("Social links", {"fields": ("youtube_url", "facebook_url", "instagram_url", "tiktok_url")}),
+        ("Social links", {"fields": ("youtube_url", "facebook_url", "instagram_url")}),
         ("Contact details", {"fields": ("whatsapp_number", ("phone_label", "phone"), ("phone2_label", "phone2"),
-                                        "email", "address", "map_embed_url")}),
-        ("Weekly schedule", {"fields": ("weekly_schedule",)}),
+                                        "email", "address",
+                                        ("map1_url", "map1_label"), ("map2_url", "map2_label"))}),
+        ("Monthly schedule", {"fields": ("monthly_schedule",)}),
         ("About page", {"fields": ("about_text", "mission", "vision")}),
     )
 

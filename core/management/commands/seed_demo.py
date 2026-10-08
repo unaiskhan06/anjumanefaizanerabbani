@@ -80,7 +80,7 @@ MISSION = ("To keep the tradition of Naat, Zikr and learning alive, bring the co
            "remembrance of Allah and His Messenger ﷺ, and make these blessed programs easy to watch for everyone.")
 VISION = ("A united, well-mannered community — young and old — connected to the Quran, the Sunnah and the "
           "teachings of the Awliya, with every home reached by the message of love and peace.")
-SCHEDULE = "Thursday after Isha — Mehfil-e-Naat & Zikr\nSunday 7 PM — Dars-e-Quran o Hadees\nMonthly — Gyarvi Sharif Mehfil"
+SCHEDULE = "Sunday after Isha — Dars-e-Quran o Hadees\nMonthly — Gyarvi Sharif Mehfil\nSpecial programs as announced"
 
 
 class Command(BaseCommand):
@@ -125,7 +125,11 @@ class Command(BaseCommand):
             "phone2": "+91 97910 54168",
             "email": "anjumanefaizanerabbani@gmail.com",
             "address": "Chennai, Tamil Nadu, India",
-            "weekly_schedule": SCHEDULE,
+            "map1_url": "https://maps.app.goo.gl/oDSGwA6xTEDdaEqT8?g_st=aw",
+            "map1_label": "Darbar E Huzoor Mufassir E Quran",
+            "map2_url": "https://goo.gl/maps/H4pk8SJvkLgpB9739?g_st=aw",
+            "map2_label": "Khankha E Anjuman E Faizan E Rabbani",
+            "monthly_schedule": SCHEDULE,
             "about_text": ABOUT,
             "mission": MISSION,
             "vision": VISION,

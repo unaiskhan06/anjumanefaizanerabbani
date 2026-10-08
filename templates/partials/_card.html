@@ -1,9 +1,9 @@
-<article class="card{% if video.is_short %} card--short{% endif %}">
+<article class="card{% if video.is_vertical %} card--short{% endif %}">
   <a class="card-link" href="{{ video.get_absolute_url }}">
     <div class="card-thumb">
-      <img src="{{ video.thumbnail }}" alt="" loading="lazy" decoding="async" width="480" height="360">
+      <img src="{{ video.thumbnail }}" alt="" loading="lazy" decoding="async" {% if video.is_vertical %}width="360" height="640"{% else %}width="480" height="360"{% endif %}>
       <span class="card-play" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>
-      {% if video.is_live %}<span class="badge badge-live">● LIVE</span>{% elif video.is_short %}<span class="badge">Short</span>{% endif %}
+      {% if video.is_live %}<span class="badge badge-live">● LIVE</span>{% elif video.is_reel %}<span class="badge">Reel</span>{% elif video.is_short %}<span class="badge">Short</span>{% endif %}
     </div>
     <div class="card-body">
       <h3 class="card-title">{{ video.title }}</h3>

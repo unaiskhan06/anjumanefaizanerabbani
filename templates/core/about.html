@@ -28,9 +28,72 @@
       {% if site.vision %}{{ site.vision|linebreaks }}{% else %}<p>Coming soon.</p>{% endif %}
     </div>
   </div>
+
+  {% if donation %}
+  <div class="container" id="chanda">
+    <div class="chanda-section">
+      <div class="chanda-header">
+        <p class="chanda-bismillah" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+        <h2 class="chanda-title">{{ donation.title }}</h2>
+        {% if donation.title_urdu %}<p class="chanda-title-urdu" lang="ur" dir="rtl">{{ donation.title_urdu }}</p>{% endif %}
+      </div>
+      <div class="chanda-body">
+        <div class="chanda-text">
+          {{ donation.description|linebreaks }}
+          {% if donation.upi_id %}
+          <div class="chanda-upi">
+            <span class="chanda-upi-label">📱 UPI ID:</span>
+            <code class="chanda-upi-id" id="upi-id">{{ donation.upi_id }}</code>
+            <button type="button" class="chanda-copy-btn" id="copy-upi-btn" title="Copy UPI ID" aria-label="Copy UPI ID to clipboard">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <span class="chanda-copy-text">Copy</span>
+            </button>
+          </div>
+          {% endif %}
+        </div>
+        <div class="chanda-qr-wrap">
+          <div class="chanda-qr-card">
+            <img src="{{ donation.qr_image.url }}" alt="Scan to contribute — {{ donation.upi_id }}" class="chanda-qr-img" width="280" height="280" loading="lazy">
+            <p class="chanda-scan-hint">Scan with any UPI app to contribute</p>
+          </div>
+        </div>
+      </div>
+      {% if donation.footer_note %}
+      <div class="chanda-footer">
+        <p class="chanda-dua">{{ donation.footer_note }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
   <div class="container about-cta">
     <a class="btn btn-primary" href="{% url 'contact:contact' %}">Contact the committee</a>
     {% if site.youtube_url %}<a class="btn btn-youtube" href="{{ site.youtube_url }}" target="_blank" rel="noopener"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-youtube"/></svg> Visit our channel</a>{% endif %}
   </div>
 </section>
+
+<script>
+(function() {
+  var btn = document.getElementById('copy-upi-btn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var upi = document.getElementById('upi-id').textContent.trim();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(upi).then(function() {
+        btn.querySelector('.chanda-copy-text').textContent = 'Copied!';
+        setTimeout(function() { btn.querySelector('.chanda-copy-text').textContent = 'Copy'; }, 2000);
+      });
+    } else {
+      /* Fallback for older browsers */
+      var ta = document.createElement('textarea');
+      ta.value = upi; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.querySelector('.chanda-copy-text').textContent = 'Copied!';
+      setTimeout(function() { btn.querySelector('.chanda-copy-text').textContent = 'Copy'; }, 2000);
+    }
+  });
+})();
+</script>
 {% endblock %}
+

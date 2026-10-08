@@ -4,6 +4,7 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html
 
+from . import instagram
 from .forms import BulkImportForm
 from .models import Category, Video
 from .services import bulk_import
@@ -27,21 +28,21 @@ class VideoAdmin(admin.ModelAdmin):
                     "views", "created_at")
     list_display_links = ("thumb", "title")
     list_filter = ("category", "video_type", "published", "is_featured", "is_live")
-    search_fields = ("title", "title_urdu", "artist", "youtube_id", "category__name")
+    search_fields = ("title", "title_urdu", "artist", "youtube_id", "instagram_shortcode", "category__name")
     list_select_related = ("category",)
     list_per_page = 30
     date_hierarchy = "created_at"
     actions = ("make_published", "make_unpublished", "make_featured")
-    readonly_fields = ("youtube_id", "slug", "thumbnail_preview", "player_preview", "views", "created_at")
+    readonly_fields = ("youtube_id", "instagram_shortcode", "slug", "thumbnail_preview", "player_preview", "views", "created_at")
     fieldsets = (
-        ("Step 1 — Paste the YouTube link", {"fields": ("youtube_url", "category", "video_type")}),
+        ("Step 1 — Paste a YouTube or Instagram link", {"fields": ("youtube_url", "instagram_url", "category", "video_type")}),
         ("Step 2 — Details (optional)", {
             "fields": ("title", "title_urdu", "artist", "description", "custom_thumbnail"),
             "description": "Leave the title blank and it will be fetched from YouTube when you save.",
         }),
         ("Visibility", {"fields": ("published", "is_featured", "is_live")}),
         ("Preview", {"fields": ("thumbnail_preview", "player_preview")}),
-        ("Information", {"classes": ("collapse",), "fields": ("youtube_id", "slug", "views", "created_at")}),
+        ("Information", {"classes": ("collapse",), "fields": ("youtube_id", "instagram_shortcode", "slug", "views", "created_at")}),
     )
 
     class Media:
@@ -53,20 +54,30 @@ class VideoAdmin(admin.ModelAdmin):
 
     @admin.display(description="Thumbnail")
     def thumbnail_preview(self, obj):
-        if not obj.youtube_id:
+        if not obj.youtube_id and not obj.instagram_shortcode:
             return format_html('<div id="yt-thumb-preview">Paste a link above to see the thumbnail.</div>')
         return format_html('<div id="yt-thumb-preview">{}</div>', obj.thumbnail_tag(320))
 
     @admin.display(description="Player")
     def player_preview(self, obj):
-        src = f"https://www.youtube-nocookie.com/embed/{obj.youtube_id}?rel=0" if obj.youtube_id else ""
-        return format_html(
-            '<div id="yt-player-preview" style="max-width:480px;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden">'
-            '<iframe src="{}" title="Preview" style="width:100%;height:100%;border:0" loading="lazy" '
-            'referrerpolicy="strict-origin-when-cross-origin" '
-            'allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
-            src,
-        )
+        if obj.youtube_id:
+            src = f"https://www.youtube-nocookie.com/embed/{obj.youtube_id}?rel=0"
+            return format_html(
+                '<div id="yt-player-preview" style="max-width:480px;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden">'
+                '<iframe src="{}" title="Preview" style="width:100%;height:100%;border:0" loading="lazy" '
+                'referrerpolicy="strict-origin-when-cross-origin" '
+                'allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+                src,
+            )
+        if obj.instagram_shortcode:
+            src = instagram.embed_url(obj.instagram_shortcode, obj.instagram_url)
+            return format_html(
+                '<div id="yt-player-preview" style="max-width:360px;aspect-ratio:9/16;background:#000;border-radius:8px;overflow:hidden">'
+                '<iframe src="{}" title="Preview" style="width:100%;height:100%;border:0" loading="lazy" '
+                'referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>',
+                src,
+            )
+        return format_html('<div id="yt-player-preview">Paste a link above to preview the player.</div>')
 
     @admin.action(description="Publish selected videos")
     def make_published(self, request, queryset):

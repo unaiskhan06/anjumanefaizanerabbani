@@ -43,15 +43,14 @@
         {% include "partials/_social.html" with extra_class="contact-social" %}
       </div>
       <div class="map-box">
-        {% if site.map_embed_url %}
-          <iframe src="{{ site.map_embed_url }}" title="Map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-        {% else %}
-          <div class="map-placeholder pattern-bg">
-            <svg class="icon icon-lg" aria-hidden="true"><use href="#i-pin"/></svg>
-            <p>Chennai, Tamil Nadu</p>
-            <small>Map coming soon</small>
-          </div>
-        {% endif %}
+        <div class="map-placeholder pattern-bg">
+          <svg class="icon icon-lg" aria-hidden="true"><use href="#i-pin"/></svg>
+          <p>Locations</p>
+          <ul class="map-links">
+            {% if site.map1_url %}<li><a href="{{ site.map1_url }}" target="_blank" rel="noopener">{{ site.map1_label|default:"Location 1" }}</a></li>{% endif %}
+            {% if site.map2_url %}<li><a href="{{ site.map2_url }}" target="_blank" rel="noopener">{{ site.map2_label|default:"Location 2" }}</a></li>{% endif %}
+          </ul>
+        </div>
       </div>
     </aside>
   </div>

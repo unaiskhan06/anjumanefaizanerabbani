@@ -8,7 +8,7 @@ from django.utils import timezone
 from events.models import Event
 from videos.models import Category, Video
 
-from .models import Announcement, Banner, PartnerChannel, PlaylistLink
+from .models import Announcement, Banner, DonationInfo, PartnerChannel, PlaylistLink
 from .utils import HOME_CACHE_KEY, paginate
 
 ROW_SIZE = 12
@@ -34,6 +34,9 @@ def _build_home_data():
         {"id": "shorts", "title": "YouTube Shorts", "title_urdu": "شارٹس",
          "videos": list(base.filter(video_type=Video.TYPE_SHORT)[:ROW_SIZE]),
          "url": reverse("videos:all") + "?type=short", "is_short_row": True},
+        {"id": "reels", "title": "Instagram Reels", "title_urdu": "انستاگرام ریلز",
+         "videos": list(base.filter(video_type=Video.TYPE_REEL)[:ROW_SIZE]),
+         "url": reverse("videos:all") + "?type=reel", "is_short_row": True},
         {"id": "kids", "title": "Kids Special", "title_urdu": "بچوں کے لیے",
          "videos": list(regular.filter(Q(video_type=Video.TYPE_KIDS) | Q(category__slug="kids-special"))[:ROW_SIZE]),
          "url": reverse("videos:all") + "?type=kids"},
@@ -60,7 +63,8 @@ def home(request):
 
 
 def about(request):
-    return render(request, "core/about.html")
+    donation = DonationInfo.objects.filter(active=True).first()
+    return render(request, "core/about.html", {"donation": donation})
 
 
 def playlists(request):

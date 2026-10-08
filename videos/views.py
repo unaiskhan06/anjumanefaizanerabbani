@@ -21,6 +21,7 @@ TYPE_LABELS = {
     "kids": ("Kids Special", "بچوں کے لیے"),
     "audio": ("Audio Naats", "آڈیو نعتیں"),
     "full": ("Full Videos", "مکمل ویڈیوز"),
+    "reel": ("Instagram Reels", "انستاگرام ریلز"),
 }
 
 
@@ -93,7 +94,7 @@ def _video_jsonld(request, video):
         "description": Truncator(strip_tags(video.description) or video.title).chars(300),
         "thumbnailUrl": [request.build_absolute_uri(video.thumbnail)],
         "uploadDate": video.created_at,
-        "embedUrl": f"https://www.youtube.com/embed/{video.youtube_id}",
+        "embedUrl": video.embed_url,
         "contentUrl": video.watch_url,
         "url": request.build_absolute_uri(video.get_absolute_url()),
         "interactionStatistic": {
