@@ -758,7 +758,7 @@ body.no-scroll { overflow: hidden; }
 .chanda-copy-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--bg-alt); }
 .chanda-qr-wrap { display: grid; justify-items: center; }
 .chanda-qr-card {
-  display: grid; justify-items: center; gap: 12px; padding: 20px;
+  display: grid; justify-items: center; gap: 8px; padding: 14px;
   background: var(--white); border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px rgba(3, 105, 161, .12), 0 0 0 1px var(--border);
 }
