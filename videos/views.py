@@ -16,13 +16,6 @@ from core.utils import paginate
 from .models import Category, Video
 
 PER_PAGE = 12
-TYPE_LABELS = {
-    "short": ("YouTube Shorts", "شارٹس"),
-    "kids": ("Kids Special", "بچوں کے لیے"),
-    "audio": ("Audio Naats", "آڈیو نعتیں"),
-    "full": ("Full Videos", "مکمل ویڈیوز"),
-    "reel": ("Instagram Reels", "انستاگرام ریلز"),
-}
 
 
 def category_list(request):
@@ -54,19 +47,23 @@ def category_detail(request, slug):
 def all_videos(request):
     video_type = request.GET.get("type", "")
     videos = Video.objects.published()
+    categories = list(Category.objects.all())
+    for cat in categories:
+        cat.latest_videos = Video.objects.published().filter(category=cat)[:4]
+    
     title, title_urdu = "Latest Videos", "تازہ ویڈیوز"
-    if video_type in TYPE_LABELS:
-        title, title_urdu = TYPE_LABELS[video_type]
-        videos = videos.filter(video_type=video_type)
-        if video_type == Video.TYPE_KIDS:
-            videos = Video.objects.published().filter(Q(video_type=video_type) | Q(category__slug="kids-special"))
-    if video_type != Video.TYPE_SHORT:
-        videos = videos.exclude(video_type=Video.TYPE_SHORT)
+    if video_type:
+        matching_cat = next((c for c in categories if c.name == video_type), None)
+        if matching_cat:
+            title = matching_cat.name
+            title_urdu = matching_cat.name_urdu or matching_cat.name
+            videos = videos.filter(video_type=video_type)
     return render(request, "videos/video_list.html", {
         "page_obj": paginate(request, videos, PER_PAGE),
         "title": title,
         "title_urdu": title_urdu,
         "video_type": video_type,
+        "categories": categories,
     })
 
 

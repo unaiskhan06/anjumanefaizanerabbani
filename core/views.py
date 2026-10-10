@@ -26,6 +26,8 @@ def _build_home_data():
     # Shorts only appear in the "YouTube Shorts" row; every other row shows full-size videos.
     regular = base.exclude(video_type=Video.TYPE_SHORT)
     categories = {c.slug: c for c in Category.objects.all()}
+    for c in categories.values():
+        c.latest_videos = list(base.filter(category=c)[:4])
     rows = [
         {"id": "latest", "title": "Latest Videos", "title_urdu": "تازہ ویڈیوز",
          "videos": list(regular[:ROW_SIZE]), "url": reverse("videos:all")},

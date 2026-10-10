@@ -40,6 +40,15 @@ class PublishedVideoQuerySet(models.QuerySet):
         return self.filter(published=True).select_related("category")
 
 
+def get_pdf_storage():
+    from django.conf import settings
+    if getattr(settings, "USE_CLOUDINARY", False):
+        from cloudinary_storage.storage import RawMediaCloudinaryStorage
+        return RawMediaCloudinaryStorage()
+    from django.core.files.storage import default_storage
+    return default_storage
+
+
 class Video(models.Model):
     TYPE_FULL, TYPE_SHORT, TYPE_KIDS, TYPE_AUDIO, TYPE_REEL = "full", "short", "kids", "audio", "reel"
     TYPE_CHOICES = [
@@ -58,6 +67,10 @@ class Video(models.Model):
         "Instagram reel link", blank=True,
         help_text="Paste an Instagram reel/post link to play it inside the site.",
     )
+    pdf_file = models.FileField(
+        "PDF file", upload_to="pdfs/", blank=True, storage=get_pdf_storage,
+        help_text="Upload a PDF document. You can upload a PDF without a YouTube or Instagram link.",
+    )
     youtube_id = models.CharField("YouTube ID", max_length=11, unique=True, editable=False, blank=True, null=True)
     instagram_shortcode = models.CharField("Instagram shortcode", max_length=30, unique=True, editable=False,
                                            blank=True, null=True)
@@ -66,7 +79,7 @@ class Video(models.Model):
     title_urdu = models.CharField("Title (Urdu)", max_length=255, blank=True)
     slug = models.SlugField(max_length=280, unique=True, editable=False)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="videos", blank=True, null=True)
-    video_type = models.CharField("Type", max_length=10, choices=TYPE_CHOICES, default=TYPE_FULL)
+    video_type = models.CharField("Type", max_length=140, blank=True, default="")
     artist = models.CharField("Artist / Speaker", max_length=150, blank=True)
     description = models.TextField(blank=True)
     custom_thumbnail = models.ImageField(upload_to="thumbnails/", blank=True,
@@ -101,8 +114,9 @@ class Video(models.Model):
         super().clean()
         video_id = youtube.extract_youtube_id(self.youtube_url) if self.youtube_url else None
         shortcode = instagram.extract_shortcode(self.instagram_url) if self.instagram_url else None
-        if not video_id and not shortcode:
-            raise ValidationError({"youtube_url": "Paste a YouTube link or an Instagram reel link."})
+        has_pdf = bool(self.pdf_file)
+        if not video_id and not shortcode and not has_pdf:
+            raise ValidationError({"youtube_url": "Paste a YouTube link, an Instagram reel link, or upload a PDF file."})
         if self.youtube_url and not video_id:
             raise ValidationError({"youtube_url": "This does not look like a valid YouTube link. "
                                                   "Please paste a link such as https://youtu.be/XXXXXXXXXXX."})
@@ -123,8 +137,9 @@ class Video(models.Model):
     def save(self, *args, **kwargs):
         video_id = youtube.extract_youtube_id(self.youtube_url) if self.youtube_url else None
         shortcode = instagram.extract_shortcode(self.instagram_url) if self.instagram_url else None
-        if not video_id and not shortcode:
-            raise ValidationError("Paste a YouTube link or an Instagram reel link.")
+        has_pdf = bool(self.pdf_file)
+        if not video_id and not shortcode and not has_pdf:
+            raise ValidationError("Paste a YouTube link, an Instagram reel link, or upload a PDF file.")
         self.youtube_id = video_id
         self.instagram_shortcode = shortcode
         if video_id and youtube.is_shorts_url(self.youtube_url) and self.video_type not in (self.TYPE_KIDS, self.TYPE_AUDIO, self.TYPE_REEL):
@@ -134,12 +149,14 @@ class Video(models.Model):
         if not self.title.strip():
             if video_id:
                 self.title = youtube.fetch_title(video_id) or f"Video {video_id}"
-            else:
+            elif shortcode:
                 self.title = "Instagram Reel"
+            elif has_pdf:
+                self.title = self.pdf_file.name.rsplit("/", 1)[-1].rsplit(".", 1)[0].replace("_", " ").replace("-", " ").title()
         if not self.category_id:
             self.category = self._get_or_create_instagram_category() if shortcode else None
         if not self.slug:
-            fallback = video_id or shortcode or "reel"
+            fallback = video_id or shortcode or "pdf"
             self.slug = unique_slug(self, self.title, fallback=fallback)
         self.youtube_url = self.youtube_url.strip()
         self.instagram_url = self.instagram_url.strip()

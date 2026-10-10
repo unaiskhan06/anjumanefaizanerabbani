@@ -40,6 +40,14 @@
     audio.src = item.getAttribute("data-src");
     elTitle.textContent = item.getAttribute("data-title");
     elArtist.textContent = item.getAttribute("data-artist") || "";
+    var imgUrl = item.getAttribute("data-image");
+    var apImg = player.querySelector("[data-ap-image]");
+    var apIcon = player.querySelector(".ap-icon");
+    if (apImg) {
+      if (imgUrl) { apImg.src = imgUrl; apImg.style.display = "block"; }
+      else { apImg.style.display = "none"; }
+    }
+    if (apIcon) apIcon.style.display = imgUrl ? "none" : "block";
     seek.value = 0;
     elCurrent.textContent = "0:00";
     if (autoplay) play();

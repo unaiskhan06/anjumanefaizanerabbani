@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin, messages
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -8,6 +9,20 @@ from . import instagram
 from .forms import BulkImportForm
 from .models import Category, Video
 from .services import bulk_import
+
+
+class VideoAdminForm(forms.ModelForm):
+    """Custom form that populates the Type dropdown from Category names."""
+
+    class Meta:
+        model = Video
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        choices = [("", "---------")]
+        choices += [(cat.name, cat.name) for cat in Category.objects.all()]
+        self.fields["video_type"].widget = forms.Select(choices=choices)
 
 
 @admin.register(Category)
@@ -24,6 +39,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
+    form = VideoAdminForm
     list_display = ("thumb", "title", "category", "video_type", "published", "is_featured", "is_live",
                     "views", "created_at")
     list_display_links = ("thumb", "title")
@@ -35,7 +51,7 @@ class VideoAdmin(admin.ModelAdmin):
     actions = ("make_published", "make_unpublished", "make_featured")
     readonly_fields = ("youtube_id", "instagram_shortcode", "slug", "thumbnail_preview", "player_preview", "views", "created_at")
     fieldsets = (
-        ("Step 1 — Paste a YouTube or Instagram link", {"fields": ("youtube_url", "instagram_url", "category", "video_type")}),
+        ("Step 1 — Paste a YouTube or Instagram link, or upload a PDF", {"fields": ("youtube_url", "instagram_url", "pdf_file", "category", "video_type")}),
         ("Step 2 — Details (optional)", {
             "fields": ("title", "title_urdu", "artist", "description", "custom_thumbnail"),
             "description": "Leave the title blank and it will be fetched from YouTube when you save.",

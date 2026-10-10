@@ -21,6 +21,8 @@ class AudioTrack(models.Model):
         upload_to="audio/",
         validators=[FileExtensionValidator(["mp3", "m4a", "ogg", "wav", "aac"])],
     )
+    image = models.ImageField("Cover image", upload_to="audio/covers/", blank=True)
+    description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:

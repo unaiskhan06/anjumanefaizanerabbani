@@ -25,8 +25,14 @@ class GalleryImageAdmin(admin.ModelAdmin):
 
 @admin.register(AudioTrack)
 class AudioTrackAdmin(admin.ModelAdmin):
-    list_display = ("title", "artist", "player", "created_at")
+    list_display = ("cover_preview", "title", "artist", "player", "created_at")
     search_fields = ("title", "artist")
+
+    @admin.display(description="")
+    def cover_preview(self, obj):
+        if not obj.image:
+            return "—"
+        return format_html('<img src="{}" width="60" style="border-radius:6px;aspect-ratio:1;object-fit:cover" loading="lazy" alt="">', obj.image.url)
 
     @admin.display(description="Listen")
     def player(self, obj):
