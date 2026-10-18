@@ -158,7 +158,7 @@ if USE_CLOUDINARY:
     STORAGES["default"] = {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"}
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB
 
 # --------------------------------------------------------------------------
 # Cache (used for the home page, site settings and contact rate limiting)
@@ -194,7 +194,7 @@ CONTACT_NOTIFY_EMAIL = os.environ.get("CONTACT_NOTIFY_EMAIL", "")
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
-X_FRAME_OPTIONS = "DENY"
+X_FRAME_OPTIONS = "SAMEORIGIN"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 # YouTube embeds need the page origin in the Referer header (otherwise "Error 153").
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"

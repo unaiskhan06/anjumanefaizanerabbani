@@ -11,49 +11,99 @@
     {% if page_obj.object_list %}
     <div class="audio-player" data-audio-player>
       <audio preload="metadata" data-audio></audio>
-      <div class="ap-now">
-        <span class="ap-art" aria-hidden="true" data-ap-art>
-          <img data-ap-image alt="" style="display:none">
-          <svg class="icon ap-icon" aria-hidden="true"><use href="#i-music"/></svg>
-        </span>
-        <div>
-          <p class="ap-title" data-ap-title>Select a track</p>
-          <p class="ap-artist" data-ap-artist></p>
+      
+      <div class="ap-bar">
+        <div class="ap-now">
+          <span class="ap-art" aria-hidden="true" data-ap-art>
+            <img data-ap-image alt="" style="display:none">
+            <svg class="icon ap-icon" aria-hidden="true"><use href="#i-music"/></svg>
+          </span>
+          <div>
+            <p class="ap-title" data-ap-title>Select a track</p>
+            <p class="ap-artist" data-ap-artist></p>
+          </div>
+        </div>
+
+        <div class="ap-audio-section" data-ap-audio-section>
+          <div class="ap-controls">
+            <button class="ap-btn" type="button" aria-label="Previous track" data-ap-prev><svg class="icon" aria-hidden="true"><use href="#i-prev"/></svg></button>
+            <button class="ap-btn ap-play" type="button" aria-label="Play" data-ap-play>
+              <svg class="icon icon-play" aria-hidden="true"><use href="#i-play"/></svg>
+              <svg class="icon icon-pause" aria-hidden="true"><use href="#i-pause"/></svg>
+            </button>
+            <button class="ap-btn" type="button" aria-label="Next track" data-ap-next><svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></button>
+          </div>
+          <div class="ap-seek">
+            <span class="ap-time" data-ap-current>0:00</span>
+            <input type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek" data-ap-seek>
+            <span class="ap-time" data-ap-duration>0:00</span>
+          </div>
+          <div class="ap-volume">
+            <button class="ap-btn ap-btn-sm" type="button" aria-label="Mute" data-ap-mute>
+              <svg class="icon icon-vol" aria-hidden="true"><use href="#i-volume"/></svg>
+              <svg class="icon icon-mute" aria-hidden="true"><use href="#i-mute"/></svg>
+            </button>
+            <input type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume" data-ap-volume>
+          </div>
         </div>
       </div>
-      <div class="ap-controls">
-        <button class="ap-btn" type="button" aria-label="Previous track" data-ap-prev><svg class="icon" aria-hidden="true"><use href="#i-prev"/></svg></button>
-        <button class="ap-btn ap-play" type="button" aria-label="Play" data-ap-play>
-          <svg class="icon icon-play" aria-hidden="true"><use href="#i-play"/></svg>
-          <svg class="icon icon-pause" aria-hidden="true"><use href="#i-pause"/></svg>
-        </button>
-        <button class="ap-btn" type="button" aria-label="Next track" data-ap-next><svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></button>
-      </div>
-      <div class="ap-seek">
-        <span class="ap-time" data-ap-current>0:00</span>
-        <input type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek" data-ap-seek>
-        <span class="ap-time" data-ap-duration>0:00</span>
-      </div>
-      <div class="ap-volume">
-        <button class="ap-btn ap-btn-sm" type="button" aria-label="Mute" data-ap-mute>
-          <svg class="icon icon-vol" aria-hidden="true"><use href="#i-volume"/></svg>
-          <svg class="icon icon-mute" aria-hidden="true"><use href="#i-mute"/></svg>
-        </button>
-        <input type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume" data-ap-volume>
+
+      <!-- Image & Lyrics Zoom Viewer -->
+      <div class="ap-viewer" data-ap-viewer style="display:none">
+        <div class="ap-viewer-bar">
+          <div class="ap-viewer-title">
+            <svg class="icon ap-viewer-icon" aria-hidden="true"><use href="#i-lyrics"/></svg>
+            <span data-ap-viewer-heading>Lyrics &amp; Image</span>
+          </div>
+          <div class="ap-zoom-group" role="toolbar" aria-label="Image zoom controls">
+            <button class="ap-zoom-btn" type="button" data-ap-zoom-out aria-label="Zoom out" title="Zoom out">
+              <svg class="icon" aria-hidden="true"><use href="#i-zoom-out"/></svg>
+              <span>Zoom Out</span>
+            </button>
+            <span class="ap-zoom-value" data-ap-zoom-level aria-live="polite">100%</span>
+            <button class="ap-zoom-btn" type="button" data-ap-zoom-in aria-label="Zoom in" title="Zoom in">
+              <svg class="icon" aria-hidden="true"><use href="#i-zoom-in"/></svg>
+              <span>Zoom In</span>
+            </button>
+            <button class="ap-zoom-btn ap-zoom-reset" type="button" data-ap-zoom-reset aria-label="Reset zoom to 100%" title="Reset zoom">
+              <svg class="icon" aria-hidden="true"><use href="#i-rotate-ccw"/></svg>
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+        <div class="ap-viewer-canvas" data-ap-viewer-canvas>
+          <img class="ap-viewer-img" data-ap-viewer-img src="" alt="Lyrics sheet" loading="lazy">
+        </div>
       </div>
     </div>
 
     <ol class="playlist" data-ap-list aria-label="Playlist">
       {% for track in page_obj %}
       <li>
-        <button type="button" class="playlist-item" data-src="{{ track.audio_file.url }}" data-title="{{ track.title }}" data-artist="{{ track.artist }}"{% if track.image %} data-image="{{ track.image.url }}"{% endif %}>
+        <button type="button" class="playlist-item{% if not track.audio_file %} playlist-item--no-audio{% endif %}" {% if track.audio_file %}data-src="{{ track.audio_file.url }}"{% else %}data-no-audio{% endif %} data-title="{{ track.title }}" data-artist="{{ track.artist }}"{% if track.image %} data-image="{{ track.image.url }}"{% endif %}{% if track.lyrics_image %} data-lyrics="{{ track.lyrics_image.url }}"{% endif %}>
           <span class="playlist-num">{{ forloop.counter }}</span>
           <span class="playlist-thumb">
-            {% if track.image %}<img src="{{ track.image.url }}" alt="" loading="lazy">{% else %}<svg class="icon" aria-hidden="true"><use href="#i-music"/></svg>{% endif %}
+            {% if track.image %}
+              <img src="{{ track.image.url }}" alt="" loading="lazy">
+            {% elif track.lyrics_image %}
+              <img src="{{ track.lyrics_image.url }}" alt="" loading="lazy">
+            {% else %}
+              <svg class="icon" aria-hidden="true"><use href="#i-music"/></svg>
+            {% endif %}
           </span>
-          <span class="playlist-text"><span class="playlist-title">{{ track.title }}</span>
-          {% if track.artist %}<span class="playlist-artist">{{ track.artist }}</span>{% endif %}
-          {% if track.description %}<span class="playlist-desc">{{ track.description }}</span>{% endif %}</span>
+          <span class="playlist-text">
+            <span class="playlist-title">{{ track.title }}</span>
+            {% if track.artist %}<span class="playlist-artist">{{ track.artist }}</span>{% endif %}
+            <span class="playlist-badges">
+              {% if not track.audio_file %}
+                <span class="playlist-badge">{% if track.lyrics_image and not track.image %}Lyrics only{% else %}Image only{% endif %}</span>
+              {% endif %}
+              {% if track.lyrics_image %}
+                <span class="playlist-badge playlist-badge--lyrics">📜 Lyrics</span>
+              {% endif %}
+            </span>
+            {% if track.description %}<span class="playlist-desc">{{ track.description }}</span>{% endif %}
+          </span>
           <span class="playlist-eq" aria-hidden="true"><i></i><i></i><i></i></span>
         </button>
       </li>
@@ -65,6 +115,11 @@
     {% endif %}
   </div>
 </section>
+
+{% include "partials/_lightbox.html" %}
 {% endblock %}
 
-{% block extra_js %}<script src="{% static 'js/audio.js' %}" defer></script>{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/lightbox.js' %}" defer></script>
+<script src="{% static 'js/audio.js' %}" defer></script>
+{% endblock %}

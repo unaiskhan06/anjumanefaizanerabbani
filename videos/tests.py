@@ -218,3 +218,45 @@ class AdminTests(TestCase):
                              {"links": f"{VID}\nbad line", "category": cat.pk, "video_type": "full", "published": "on"})
         self.assertContains(r, "1</strong> created")
         self.assertTrue(Video.objects.filter(youtube_id=VID).exists())
+
+
+class PDFUploadTests(TestCase):
+    def setUp(self):
+        self.cat = Category.objects.create(name="Books")
+
+    def test_save_pdf_only_generates_title_and_slug(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        pdf = SimpleUploadedFile("Firdause_tak_du_book.pdf", b"%PDF-1.4 sample content", content_type="application/pdf")
+        v = Video.objects.create(category=self.cat, pdf_file=pdf, video_type="kalam-e-rabbani")
+        self.assertEqual(v.title, "Firdause Tak Du Book")
+        self.assertTrue(v.slug.startswith("firdause-tak-du-book"))
+        self.assertTrue(bool(v.pdf_file))
+        self.assertTrue(bool(v.pdf_file.url))
+        if v.pdf_file:
+            v.pdf_file.delete(save=False)
+
+    def test_smart_storage_fallback_on_large_file(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from .storage import SmartPDFStorage
+        storage = SmartPDFStorage()
+        large_content = SimpleUploadedFile("big_book.pdf", b"x" * 100, content_type="application/pdf")
+        large_content.size = 15 * 1024 * 1024  # 15MB
+        saved_name = storage.save("pdfs/big_book.pdf", large_content)
+        self.assertTrue(storage.exists(saved_name))
+        url = storage.url(saved_name)
+        self.assertTrue(url.startswith("/media/pdfs/"))
+        storage.delete(saved_name)
+
+    def test_smart_storage_fallback_on_cloudinary_error(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from .storage import SmartPDFStorage
+        storage = SmartPDFStorage()
+        content = SimpleUploadedFile("cloud_fail.pdf", b"%PDF-1.4 content", content_type="application/pdf")
+        content.size = 5 * 1024 * 1024  # 5MB within limit
+        mock_cloud = mock.MagicMock()
+        mock_cloud._save.side_effect = Exception("Cloudinary file size error")
+        with mock.patch.object(SmartPDFStorage, "cloudinary_storage", new_callable=mock.PropertyMock) as prop:
+            prop.return_value = mock_cloud
+            saved_name = storage.save("pdfs/cloud_fail.pdf", content)
+            self.assertTrue(storage.exists(saved_name))
+            storage.delete(saved_name)

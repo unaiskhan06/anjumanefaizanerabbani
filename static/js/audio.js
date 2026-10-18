@@ -29,6 +29,71 @@
     return m + ":" + String(s).padStart(2, "0");
   }
 
+  /* Show a brief "no audio" toast on the player bar. */
+  function showNoAudioToast() {
+    var old = player.querySelector(".ap-toast");
+    if (old) old.remove();
+    var toast = document.createElement("div");
+    toast.className = "ap-toast";
+    toast.textContent = "No audio available";
+    player.appendChild(toast);
+    setTimeout(function () { toast.classList.add("ap-toast--visible"); }, 10);
+    setTimeout(function () { toast.classList.remove("ap-toast--visible"); }, 2200);
+    setTimeout(function () { toast.remove(); }, 2600);
+  }
+
+  /* Find the next playable (has audio) item index in a given direction. */
+  function nextPlayable(from, dir) {
+    for (var n = 1; n <= items.length; n++) {
+      var idx = (from + n * dir + items.length) % items.length;
+      if (!items[idx].hasAttribute("data-no-audio")) return idx;
+    }
+    return -1; /* every item is image-only */
+  }
+
+  /* Zoom controls state */
+  var zoomScale = 1.0;
+  var MIN_ZOOM = 0.5;
+  var MAX_ZOOM = 3.5;
+  var ZOOM_STEP = 0.25;
+
+  var viewer = player.querySelector("[data-ap-viewer]");
+  var viewerImg = player.querySelector("[data-ap-viewer-img]");
+  var viewerHeading = player.querySelector("[data-ap-viewer-heading]");
+  var btnZoomIn = player.querySelector("[data-ap-zoom-in]");
+  var btnZoomOut = player.querySelector("[data-ap-zoom-out]");
+  var btnZoomReset = player.querySelector("[data-ap-zoom-reset]");
+  var elZoomLevel = player.querySelector("[data-ap-zoom-level]");
+
+  function updateZoom(newScale) {
+    zoomScale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round(newScale * 100) / 100));
+    if (viewerImg) {
+      if (zoomScale > 1) {
+        viewerImg.style.maxWidth = "none";
+        viewerImg.style.width = (zoomScale * 100) + "%";
+      } else if (zoomScale < 1) {
+        viewerImg.style.maxWidth = "100%";
+        viewerImg.style.width = (zoomScale * 100) + "%";
+      } else {
+        viewerImg.style.maxWidth = "100%";
+        viewerImg.style.width = "auto";
+      }
+    }
+    if (elZoomLevel) {
+      elZoomLevel.textContent = Math.round(zoomScale * 100) + "%";
+    }
+  }
+
+  if (btnZoomIn) {
+    btnZoomIn.addEventListener("click", function () { updateZoom(zoomScale + ZOOM_STEP); });
+  }
+  if (btnZoomOut) {
+    btnZoomOut.addEventListener("click", function () { updateZoom(zoomScale - ZOOM_STEP); });
+  }
+  if (btnZoomReset) {
+    btnZoomReset.addEventListener("click", function () { updateZoom(1.0); });
+  }
+
   function load(i, autoplay) {
     if (!items.length) return;
     current = (i + items.length) % items.length;
@@ -37,30 +102,79 @@
       el.classList.toggle("is-current", n === current);
       if (n === current) el.setAttribute("aria-current", "true"); else el.removeAttribute("aria-current");
     });
-    audio.src = item.getAttribute("data-src");
-    elTitle.textContent = item.getAttribute("data-title");
-    elArtist.textContent = item.getAttribute("data-artist") || "";
-    var imgUrl = item.getAttribute("data-image");
+
+    var title = item.getAttribute("data-title") || "";
+    var artist = item.getAttribute("data-artist") || "";
+    elTitle.textContent = title;
+    elArtist.textContent = artist;
+
+    var lyricsUrl = item.getAttribute("data-lyrics");
+    var coverUrl = item.getAttribute("data-image");
+    var displayImg = lyricsUrl || coverUrl;
+
+    /* Avatar thumbnail */
     var apImg = player.querySelector("[data-ap-image]");
     var apIcon = player.querySelector(".ap-icon");
     if (apImg) {
-      if (imgUrl) { apImg.src = imgUrl; apImg.style.display = "block"; }
+      if (displayImg) { apImg.src = displayImg; apImg.style.display = "block"; }
       else { apImg.style.display = "none"; }
     }
-    if (apIcon) apIcon.style.display = imgUrl ? "none" : "block";
+    if (apIcon) apIcon.style.display = displayImg ? "none" : "block";
+
+    /* Embedded Zoomable Image Viewer */
+    if (viewer && viewerImg) {
+      if (displayImg) {
+        viewer.style.display = "block";
+        viewerImg.src = displayImg;
+        viewerImg.alt = title + " (Lyrics / Image)";
+        if (viewerHeading) {
+          viewerHeading.textContent = lyricsUrl ? "Lyrics Sheet" : "Image View";
+        }
+        updateZoom(1.0);
+      } else {
+        viewer.style.display = "none";
+        viewerImg.src = "";
+      }
+    }
+
+    var hasAudio = !item.hasAttribute("data-no-audio") && Boolean(item.getAttribute("data-src"));
+
+    if (!hasAudio) {
+      /* ONLY IMAGE: hide play buttons, seekbar, and sound */
+      player.classList.add("is-image-only");
+      audio.pause();
+      player.classList.remove("is-playing");
+      list.classList.remove("is-playing");
+      btnPlay.setAttribute("aria-label", "Play");
+      audio.removeAttribute("src");
+      seek.value = 0; elCurrent.textContent = "0:00"; elDuration.textContent = "0:00";
+      return;
+    }
+
+    /* HAS BOTH IMAGE AND AUDIO: show play buttons and sound */
+    player.classList.remove("is-image-only");
+    audio.src = item.getAttribute("data-src");
     seek.value = 0;
     elCurrent.textContent = "0:00";
     if (autoplay) play();
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: item.getAttribute("data-title"),
-        artist: item.getAttribute("data-artist") || "Anjuman-e-Faizan-e-Rabbani"
+        title: title,
+        artist: artist || "Anjuman-e-Faizan-e-Rabbani"
       });
     }
   }
 
   function play() {
-    if (current < 0) load(0, false);
+    if (current < 0 || items[current].hasAttribute("data-no-audio")) {
+      var nxt = nextPlayable(current < 0 ? -1 : current, 1);
+      if (nxt >= 0) {
+        load(nxt, true);
+        return;
+      }
+      showNoAudioToast();
+      return;
+    }
     var p = audio.play();
     if (p && p.catch) p.catch(function () { /* autoplay blocked until user interacts */ });
   }
@@ -70,12 +184,22 @@
   btnPlay.addEventListener("click", toggle);
   btnPrev.addEventListener("click", function () {
     if (audio.currentTime > 3) { audio.currentTime = 0; return; }
-    load(current - 1, true);
+    var prv = nextPlayable(current, -1);
+    if (prv >= 0) load(prv, true);
+    else showNoAudioToast();
   });
-  btnNext.addEventListener("click", function () { load(current + 1, true); });
+  btnNext.addEventListener("click", function () {
+    var nxt = nextPlayable(current, 1);
+    if (nxt >= 0) load(nxt, true);
+    else showNoAudioToast();
+  });
 
   items.forEach(function (item, i) {
     item.addEventListener("click", function () {
+      if (item.hasAttribute("data-no-audio")) {
+        load(i, false);   /* show the card in player bar without playing */
+        return;
+      }
       if (i === current) toggle(); else load(i, true);
     });
   });
@@ -95,9 +219,11 @@
     elCurrent.textContent = fmt(audio.currentTime);
   });
   audio.addEventListener("ended", function () {
-    if (current < items.length - 1) load(current + 1, true);
+    var nxt = nextPlayable(current, 1);
+    if (nxt >= 0 && nxt !== current) load(nxt, true);
   });
   audio.addEventListener("error", function () {
+    if (current >= 0 && items[current] && items[current].hasAttribute("data-no-audio")) return;
     elArtist.textContent = "This track could not be loaded.";
   });
 
@@ -140,5 +266,7 @@
     navigator.mediaSession.setActionHandler("nexttrack", function () { load(current + 1, true); });
   }
 
-  load(0, false);
+  /* Start on the first playable track (skip image-only). */
+  var first = items[0] && items[0].hasAttribute("data-no-audio") ? nextPlayable(-1, 1) : 0;
+  if (first >= 0) load(first, false);
 })();

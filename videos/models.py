@@ -40,13 +40,7 @@ class PublishedVideoQuerySet(models.QuerySet):
         return self.filter(published=True).select_related("category")
 
 
-def get_pdf_storage():
-    from django.conf import settings
-    if getattr(settings, "USE_CLOUDINARY", False):
-        from cloudinary_storage.storage import RawMediaCloudinaryStorage
-        return RawMediaCloudinaryStorage()
-    from django.core.files.storage import default_storage
-    return default_storage
+from .storage import SmartPDFStorage, get_pdf_storage
 
 
 class Video(models.Model):

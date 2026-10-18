@@ -21,7 +21,15 @@ class VideoAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         choices = [("", "---------")]
-        choices += [(cat.name, cat.name) for cat in Category.objects.all()]
+        existing = {""}
+        for val, label in Video.TYPE_CHOICES:
+            if val not in existing:
+                choices.append((val, label))
+                existing.add(val)
+        for cat in Category.objects.all():
+            if cat.name not in existing:
+                choices.append((cat.name, cat.name))
+                existing.add(cat.name)
         self.fields["video_type"].widget = forms.Select(choices=choices)
 
 
