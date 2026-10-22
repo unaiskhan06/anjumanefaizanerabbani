@@ -5,6 +5,7 @@ All secrets and environment-specific values are read from environment
 variables (a local `.env` file is loaded automatically in development).
 """
 import os
+import sys
 from pathlib import Path
 
 import dj_database_url
@@ -202,12 +203,14 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", True)
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", True)
-    SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", False)
+    # Never force HTTPS redirect when running local development server (runserver)
+    is_runserver = "runserver" in sys.argv
+    SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", False if is_runserver else True)
+    SESSION_COOKIE_SECURE = not is_runserver
+    CSRF_COOKIE_SECURE = not is_runserver
+    SECURE_HSTS_SECONDS = 0 if is_runserver else int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False if is_runserver else env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", True)
+    SECURE_HSTS_PRELOAD = False if is_runserver else env_bool("SECURE_HSTS_PRELOAD", False)
 
 LOGGING = {
     "version": 1,

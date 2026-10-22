@@ -47,34 +47,40 @@ class Command(BaseCommand):
         parser.add_argument("--timeout", type=int, default=15)
 
     def handle(self, *args, **opts):
-        channel_id = (opts["channel_id"] or "").strip()
-        if not channel_id.startswith("UC"):
+        raw_channels = (opts["channel_id"] or "").strip()
+        channel_ids = [c.strip() for c in raw_channels.split(",") if c.strip()]
+        if not channel_ids or not all(c.startswith("UC") for c in channel_ids):
             raise CommandError("Set YOUTUBE_CHANNEL_ID in .env or pass --channel-id UCxxxxxxxx.")
 
-        shorts = [] if opts["no_shorts"] else self._fetch(SHORTS_FEED.format(channel_id[2:]), opts["timeout"],
-                                                           required=opts["only_shorts"])
-        short_ids = {e["id"] for e in shorts}
-        created = 0
+        total_created = 0
+        for channel_id in channel_ids:
+            self.stdout.write(f"\nProcessing channel {channel_id}...")
+            shorts = [] if opts["no_shorts"] else self._fetch(SHORTS_FEED.format(channel_id[2:]), opts["timeout"],
+                                                               required=opts["only_shorts"])
+            short_ids = {e["id"] for e in shorts}
+            created = 0
 
-        if shorts:
-            shorts_category = self._shorts_category(opts["shorts_category"])
-            # Fix videos that were added earlier as normal videos but are really Shorts.
-            fixed = 0
-            for video in Video.objects.filter(youtube_id__in=short_ids).exclude(video_type=Video.TYPE_SHORT):
-                video.video_type = Video.TYPE_SHORT
-                video.save(update_fields=["video_type"])
-                fixed += 1
-            if fixed:
-                self.stdout.write(f"  ~ {fixed} existing video(s) marked as Shorts")
-            created += self._create(shorts, shorts_category, Video.TYPE_SHORT, opts["publish"])
+            if shorts:
+                shorts_category = self._shorts_category(opts["shorts_category"])
+                # Fix videos that were added earlier as normal videos but are really Shorts.
+                fixed = 0
+                for video in Video.objects.filter(youtube_id__in=short_ids).exclude(video_type=Video.TYPE_SHORT):
+                    video.video_type = Video.TYPE_SHORT
+                    video.save(update_fields=["video_type"])
+                    fixed += 1
+                if fixed:
+                    self.stdout.write(f"  ~ {fixed} existing video(s) marked as Shorts")
+                created += self._create(shorts, shorts_category, Video.TYPE_SHORT, opts["publish"])
 
-        if not opts["only_shorts"]:
-            uploads = [e for e in self._fetch(UPLOADS_FEED.format(channel_id), opts["timeout"])
-                       if e["id"] not in short_ids]
-            created += self._create(uploads, self._category(opts["category"]), None, opts["publish"])
+            if not opts["only_shorts"]:
+                uploads = [e for e in self._fetch(UPLOADS_FEED.format(channel_id), opts["timeout"])
+                           if e["id"] not in short_ids]
+                created += self._create(uploads, self._category(opts["category"]), None, opts["publish"])
+
+            total_created += created
 
         state = "published" if opts["publish"] else "saved as drafts (unpublished)"
-        self.stdout.write(self.style.SUCCESS(f"Done: {created} new video(s) {state}."))
+        self.stdout.write(self.style.SUCCESS(f"\nDone: {total_created} new video(s) {state}."))
 
     def _create(self, entries, category, kind, publish):
         existing = set(Video.objects.filter(youtube_id__in=[e["id"] for e in entries])
@@ -92,8 +98,11 @@ class Command(BaseCommand):
                 video_type=video_type,
                 published=publish,
             )
-            created += 1
-            self.stdout.write(f"  + [{video_type}] {entry['title']}")
+            try:
+                self.stdout.write(f"  + [{video_type}] {entry['title']}")
+            except UnicodeEncodeError:
+                safe_title = entry["title"].encode("ascii", errors="replace").decode("ascii")
+                self.stdout.write(f"  + [{video_type}] {safe_title}")
         return created
 
     def _category(self, slug):
